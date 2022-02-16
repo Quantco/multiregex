@@ -1,0 +1,9 @@
+from typing import TypeVar, Generic, Iterator, Tuple
+
+
+T = TypeVar("T")
+
+class Automaton(Generic[T]):
+    def add_word(self, word: str, value: T) -> bool: ...
+    def make_automaton(self) -> bool: ...
+    def iter(self, str) -> Iterator[Tuple[str, T]]: ...
