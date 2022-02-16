@@ -72,7 +72,7 @@ jobs:
           ref: main
           token: ${{ secrets.FQ_GH_TOKEN }}
           path: .github/quantco-actions
-      - uses: google-github-actions/setup-gcloud@v0.3
+      - uses: google-github-actions/setup-gcloud@v0.5.1
         with:
           version: '354.0.0'
           project_id: ${{ secrets.GCP_UPLOAD_PROJECT_ID }}
