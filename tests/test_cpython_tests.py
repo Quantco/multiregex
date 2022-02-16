@@ -5,8 +5,7 @@ import re
 import pytest
 
 from multiregex import RegexMatcher, generate_prematcher
-
-from . import cpython_test_re
+from tests import cpython_test_re
 
 
 def can_generate_prematcher(pattern):
@@ -26,47 +25,31 @@ cpython_tests = [
 
 
 @pytest.mark.parametrize("pattern, s, outcome, expr, expected", cpython_tests)
-def test_patterns(pattern, s, outcome, expr, expected):
-    matcher = RegexMatcher([pattern])
+@pytest.mark.parametrize("flags", [0, re.ASCII, re.IGNORECASE, re.UNICODE])
+def test_patterns(pattern, s, outcome, expr, expected, flags):
+    matcher = RegexMatcher([re.compile(pattern, flags)])
     result = matcher.search(s)
-
     if outcome == cpython_test_re.FAIL:
         assert not result
-        return
+    else:
+        ((_, match),) = result
+        assert eval_test_expr(match, expr) == expected
 
-    assert result
-    ((_, match),) = result
+
+def eval_test_expr(match, expr):
+    from typing import Any
+
     vardict = {
         "found": match.group(0),
         "groups": match.group(),
         "flags": match.re.flags,
-        "g1": "None",
-        "g2": "None",
-        "g3": "None",
-        "g4": "None",
     }
-    for (name, key) in [
-        ("g1", 1),
-        ("g2", 2),
-        ("g3", 3),
-        ("g4", 4),
-    ] + [(g, g) for g in match.re.groupindex]:
+    numbered_groups = [("g{}".format(i), i) for i in range(100)]  # type: Any
+    named_groups = [(g, g) for g in match.re.groupindex]  # type: Any
+    for (name, key) in numbered_groups + named_groups:
         try:
             val = str(match.group(key))
         except IndexError:
-            val = "None"
+            val = "Error"
         vardict[name] = val
-    assert eval(expr, vardict) == expected
-
-
-# # Try the match with IGNORECASE enabled, and check that it
-# # still succeeds.
-# with self.subTest('case-insensitive match'):
-#     obj = re.compile(pattern, re.IGNORECASE)
-#     self.assertTrue(obj.search(s))
-
-# # Try the match with UNICODE locale enabled, and check
-# # that it still succeeds.
-# with self.subTest('unicode-sensitive match'):
-#     obj = re.compile(pattern, re.UNICODE)
-#     self.assertTrue(obj.search(s))
+    return eval(expr, vardict)

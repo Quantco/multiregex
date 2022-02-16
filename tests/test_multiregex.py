@@ -1,7 +1,9 @@
 import random
 import re
 
-from multiregex import RegexMatcher
+import pytest
+
+from multiregex import RegexMatcher, generate_prematcher
 
 
 def assert_matches(a, b):
@@ -43,3 +45,22 @@ def test_ordered():
     matcher = RegexMatcher(patterns)
     matches = matcher.search_ordered("abcdef")
     assert [p for p, _ in matches] == patterns
+
+
+@pytest.mark.parametrize(
+    "pattern, prematcher",
+    [
+        ("a", "a"),
+        ("[a]", "a"),
+        ("a[0-9]b", "a"),
+        ("a[0-9]+b", "a"),
+        ("a[0-9]*b", "a"),
+        ("a[0-9]?b", "a"),
+        ("a[x+]b", "a"),
+    ],
+)
+def test_generate_prematcher(pattern, prematcher):
+    try:
+        assert generate_prematcher(re.compile(pattern)) == prematcher
+    except ValueError:
+        assert prematcher is None

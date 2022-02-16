@@ -20,7 +20,18 @@ automatically generated prematchers.
 import collections
 import functools
 import re
-from typing import Dict, Iterable, List, Optional, Pattern, Set, Tuple, TypeVar, Union
+from typing import (
+    Dict,
+    Iterable,
+    List,
+    Match,
+    Optional,
+    Pattern,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import ahocorasick
 import pkg_resources
@@ -42,6 +53,16 @@ class RegexMatcher:
             Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
     ):
+        """
+        Parameters
+        ----------
+        patterns : list of patterns or (pattern, prematchers) tuples
+            The patterns to match against. Patterns may either be instances of
+            `re.Pattern` (results from `re.compile`) or strings.
+            If given as list of `(pattern, prematchers)` tuples, `prematchers`
+            are custom prematchers (iterables of strings) or `None` for automatic
+            prematchers using `generate_prematchers`.
+        """
         patterns = self._normalize_patterns(patterns)
         self.patterns = [
             (pattern, prematchers or self.generate_prematchers(pattern))
@@ -51,11 +72,13 @@ class RegexMatcher:
 
     @staticmethod
     def generate_prematchers(pattern: Pattern) -> Set[str]:
+        """Generate prematchers for the given pattern."""
         prematcher = generate_prematcher(pattern)
         return {prematcher}
 
     @staticmethod
     def _normalize_patterns(patterns) -> List[Tuple[Pattern, Set[str]]]:
+        """Normalize `patterns` param given to `__init__`."""
         if isinstance(patterns, str):
             raise TypeError(
                 "Refusing to interpret {!r} as a list of patterns, pass a list of strings instead".format(
@@ -72,22 +95,33 @@ class RegexMatcher:
         return patterns
 
     def _make_automaton(self):
+        """Create the pyahocorasick automaton."""
         pattern_candidates_by_prematchers = collections.defaultdict(set)
         for pattern, prematchers in self.patterns:
             for prematcher in prematchers:
                 pattern_candidates_by_prematchers[prematcher].add(pattern)
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
-    def match(self, s):
+    def match(self, s) -> Set[Tuple[Pattern, Match]]:
+        """Quickly run `re.match` against `s` for all patterns."""
         return self._match(s, re.match, ordered=False)
 
-    def match_ordered(self, s):
+    def match_ordered(self, s) -> List[Tuple[Pattern, Match]]:
+        """Quickly run `re.match` against `s` for all patterns.
+
+        Return results in the same order as `self.patterns` (potentially slower than `match`).
+        """
         return self._match(s, re.match, ordered=True)
 
-    def search(self, s):
+    def search(self, s) -> Set[Tuple[Pattern, Match]]:
+        """Quickly run `re.match` against `s` for all patterns."""
         return self._match(s, re.search, ordered=False)
 
-    def search_ordered(self, s):
+    def search_ordered(self, s) -> List[Tuple[Pattern, Match]]:
+        """Quickly run `re.match` against `s` for all patterns.
+
+        Return results in the same order as `self.patterns` (potentially slower than `search`).
+        """
         return self._match(s, re.search, ordered=True)
 
     def _match(self, s, match_method, ordered):
@@ -108,40 +142,58 @@ class RegexMatcher:
             return set(matches)
 
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
+        """Get a set of patterns that potentially match `s`."""
         s = s.lower().encode("ascii", errors="ignore").decode()
         return set.union(
             set(), *(candidates for _, candidates in self._automaton.iter(s))
         )
 
 
-def generate_prematcher(pattern: Pattern, placeholder="ppllaacceehhoollddeerr") -> str:
+def generate_prematcher(pattern: Pattern, placeholder="\x01") -> str:
     """Generate a fallback/default prematcher for the given regex `pattern`."""
-    if pattern.flags & re.VERBOSE:
-        raise ValueError(
-            "Could not generate prematcher for verbose pattern {!r}".format(
-                pattern.pattern
-            )
+
+    def err(reason):
+        return ValueError(
+            "Could not generate prematcher {}: {!r}".format(reason, pattern.pattern)
         )
+
     pat = pattern.pattern
-    assert placeholder not in pat
-    # Strip any leading and trailing \b.
+    if pattern.flags & re.VERBOSE:
+        raise err(" for verbose pattern")
+    if placeholder in pat:
+        raise err(" for pattern containing placeholder{!r}".format(placeholder))
+    if re.search(r"\\[0-7]{3}", pat):
+        raise err(" containing octal escape")
+    if re.search(r"\\x", pat):
+        raise err(r" containing \x.. escape")
+    # Strip any leading and trailing modifiers.
     # Eg. "\bfoo(\s)*(?:ue|\u00fc)xy" -> "foo(\s)*(?:ue|\u00fc)xy"
-    while pat.startswith(r"\b"):
+    modifiers1 = ("^", "$")
+    modifiers2 = (r"\b", r"\B")
+    while pat.startswith(modifiers2):
         pat = pat[2:]
-    while pat.endswith(r"\b"):
+    while pat.startswith(modifiers1):
+        pat = pat[1:]
+    while pat.endswith(modifiers2):
         pat = pat[:-2]
+    while pat.endswith(modifiers1):
+        pat = pat[:-1]
     # Some safe cleanup.
-    # Eg. "foo(\s)*(?:ue|\u00fc)xy" -> "foo(?:ue|\u00fc)xy"
-    pat = (
-        pat.lower()
-        .replace(r"(\s)", r"\s")
-        .replace(r"\s*", placeholder)
-        .replace(r"\s", placeholder)
-        .replace(r"\.", placeholder)
-    )
-    # Replace character ranges with placeholder.
-    pat = re.sub(r"\[[^\]]+\]", placeholder, pat)
-    # Common special case: Replace simple alternatives "(a|b)" or "(?:a|b)"
+    # Eg. "fo[o](\s)*(?:ue|\u00fc)xy" -> "foo(?:ue|\u00fc)xy"
+    # Note: This is incorrect within [...], eg. for "[(\s)]"
+    pat = re.sub(r"\((.)\)", r"\1", pat)
+    pat = re.sub(r"\\s\*?|\\.", placeholder, pat)
+    if "[" not in pat:  # These replacements are generally not safe within [...]
+        # Replace "X+" with "X" + placeholder
+        pat = re.sub(r"(\w)\+", r"\1" + placeholder, pat)
+        # Replace "X?" with placeholder.
+        pat = re.sub(r"\w\?", placeholder, pat)
+    elif not re.search(r"\[[^\]]*\[", pat):  # Don't replace [...] inside other [...]
+        # Replace "[X]" with "X"
+        pat = re.sub(r"\[(.)\]", r"\1", pat)
+        # Replace character ranges with placeholder.
+        pat = re.sub(r"\[[^\]]+\][\+\?\*]?", placeholder, pat)
+    # Replace simple alternatives "(a|b)" or "(?:a|b)"
     # with placeholder. Only replace if it's the only alternative in the pattern.
     # Eg. "foo_(?:ue|\u00fc)xy" -> "foo__xy"
     if pat.count("(") == 1:
@@ -154,11 +206,9 @@ def generate_prematcher(pattern: Pattern, placeholder="ppllaacceehhoollddeerr") 
     pat = pat.encode("ascii", "ignore").decode()
     # If any special regex characters are left in the pattern, refuse to generate
     # a prematcher.
-    if not pat or re.search(r"[^a-z\s0-9:/-]", pat) is not None:
-        raise ValueError(
-            "Could not generate prematcher for {!r}".format(pattern.pattern)
-        )
-    return pat
+    if pat and re.search(r"[^a-z\s0-9:/-]", pat) is None:
+        return pat
+    raise err("")
 
 
 def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V]":
@@ -171,5 +221,6 @@ def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V
 
 
 def _ahocorasick_ensure_successful(res):
+    """pyahocorasick returns errors as bools."""
     if res is False:
         raise RuntimeError("Error performing ahocorasick call")
