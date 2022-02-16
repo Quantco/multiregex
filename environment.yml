@@ -1,0 +1,17 @@
+name: multiregex
+channels:
+  - quantco_main
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python>=3.8
+  - make
+  - numpydoc
+  - pip
+  - pre-commit
+  - pytest>=6  # Adds --import-mode option
+  - pytest-cov
+  - setuptools_scm
+  - sphinx
+  - sphinxcontrib-apidoc
+  - sphinx_rtd_theme

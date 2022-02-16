@@ -1,0 +1,167 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  linux-unittests:
+    name: "Linux - unit tests - Python ${{ matrix.PYTHON_VERSION }}"
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8', '3.9', '3.10']
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Fetch full git history
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - name: Run unit tests inside of container
+        uses: ./.github/quantco-actions/unittests
+        with:
+          python_version: ${{ matrix.PYTHON_VERSION }}
+          src_folder: "multiregex"
+          run_parallel: "false"
+
+  windows:
+    name: "Windows – unit tests - Python ${{ matrix.PYTHON_VERSION }}"
+    timeout-minutes: 30
+    runs-on: windows-latest
+    env:
+      CONDA_CHANNEL_UPLOAD_USER: ${{ secrets.CONDA_CHANNEL_UPLOAD_USER }}
+      CONDA_CHANNEL_UPLOAD_PASSWORD: ${{ secrets.CONDA_CHANNEL_UPLOAD_PASSWORD }}
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8', '3.9', '3.10']
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Fetch full git history
+        run: git fetch --prune --unshallow
+      - uses: conda-incubator/setup-miniconda@35d1405e78aa3f784fe3ce9a2eb378d5eeb62169
+        with:
+          miniforge-variant: Mambaforge
+          miniforge-version: 4.10.1-4
+          use-mamba: true
+          condarc-file: .github/workflows/.condarc
+      - name: Run unittests
+        shell: pwsh
+        run: |
+          mamba create --name multiregex python=${{ matrix.PYTHON_VERSION }}
+          conda activate multiregex
+          mamba env update
+          python -m pip install --no-build-isolation --disable-pip-version-check -e .
+          pytest -v ./tests
+
+  docs:
+    name: "Documentation - build & upload"
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/checkout@v2.4.0
+      - name: Checkout plain HEAD commit
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Fetch full git history
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - uses: google-github-actions/setup-gcloud@v0.3
+        with:
+          version: '354.0.0'
+          project_id: ${{ secrets.GCP_UPLOAD_PROJECT_ID }}
+          service_account_email: ${{ secrets.GCP_UPLOAD_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_UPLOAD_SA_KEY }}
+          export_default_credentials: true
+      - name: Run doc build inside of container
+        uses: ./.github/quantco-actions/docs
+      - name: Publish Docs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/${GITHUB_SHA}/
+      - name: Publish Docs
+        if: ${{ github.event_name == 'pull_request' }}
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/${{ github.event.pull_request.head.sha }}/
+      - name: Publish Docs as latest
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/latest/
+        if: github.ref == 'refs/heads/main'
+
+  pre-commit-checks:
+    name: "Linux - pre-commit checks - Python 3.8"
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Install Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Run pre-commit checks
+        uses: pre-commit/action@v2.0.3
+
+  linux-conda-build:
+    name: "Linux - conda-build - Python ${{ matrix.PYTHON_VERSION }}"
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8']
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Fetch full git history
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v2.4.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - name: Run conda-build inside of container
+        uses: ./.github/quantco-actions/conda-build
+        with:
+          python_version: ${{ matrix.PYTHON_VERSION }}
