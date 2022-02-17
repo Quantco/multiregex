@@ -3,7 +3,7 @@
 [![CI](https://github.com/Quantco/multiregex/actions/workflows/ci.yml/badge.svg)](https://github.com/Quantco/multiregex/actions/workflows/ci.yml)
 [![Documentation](https://img.shields.io/badge/docs-latest-success?style=plastic)](https://docs.dev.quantco.cloud/qc-github-artifacts/Quantco/multiregex/latest/index.html)
 
-Quickly match many regexes against a string. Provides 5-10x speedups over naïve regex matching.
+Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching.
 
 ## Installation
 
