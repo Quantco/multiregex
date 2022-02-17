@@ -20,6 +20,8 @@ automatically generated prematchers.
 import collections
 import functools
 import re
+import sre_constants
+import sre_parse
 from typing import (
     Dict,
     Iterable,
@@ -31,6 +33,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 import ahocorasick
@@ -70,11 +73,26 @@ class RegexMatcher:
         ]
         self._automaton = self._make_automaton()
 
-    @staticmethod
-    def generate_prematchers(pattern: Pattern) -> Set[str]:
+    @classmethod
+    def generate_prematchers(cls, pattern: Pattern) -> Set[str]:
         """Generate prematchers for the given pattern."""
-        prematcher = generate_prematcher(pattern)
-        return {prematcher}
+        prematchers = {generate_prematcher(pattern)}
+        for prematcher in prematchers:
+            cls.validate_prematcher(prematcher)
+        return prematchers
+
+    @staticmethod
+    def validate_prematcher(prematcher):
+        if (
+            not prematcher
+            or not prematcher.isascii()
+            or any(map(str.isupper, prematcher))
+        ):
+            raise ValueError(
+                "Prematcher {!r} must be non-empty, all-lowercase, all-ASCII".format(
+                    prematcher
+                )
+            )
 
     @staticmethod
     def _normalize_patterns(patterns) -> List[Tuple[Pattern, Set[str]]]:
@@ -166,49 +184,32 @@ def generate_prematcher(pattern: Pattern, placeholder="\x01") -> str:
         raise err(" containing octal escape")
     if re.search(r"\\x", pat):
         raise err(r" containing \x.. escape")
-    # Strip any leading and trailing modifiers.
-    # Eg. "\bfoo(\s)*(?:ue|\u00fc)xy" -> "foo(\s)*(?:ue|\u00fc)xy"
-    modifiers1 = ("^", "$")
-    modifiers2 = (r"\b", r"\B")
-    while pat.startswith(modifiers2):
-        pat = pat[2:]
-    while pat.startswith(modifiers1):
-        pat = pat[1:]
-    while pat.endswith(modifiers2):
-        pat = pat[:-2]
-    while pat.endswith(modifiers1):
-        pat = pat[:-1]
-    # Some safe cleanup.
-    # Eg. "fo[o](\s)*(?:ue|\u00fc)xy" -> "foo(?:ue|\u00fc)xy"
-    # Note: This is incorrect within [...], eg. for "[(\s)]"
-    pat = re.sub(r"\((.)\)", r"\1", pat)
-    pat = re.sub(r"\\s\*?|\\.", placeholder, pat)
-    if "[" not in pat:  # These replacements are generally not safe within [...]
-        # Replace "X+" with "X" + placeholder
-        pat = re.sub(r"(\w)\+", r"\1" + placeholder, pat)
-        # Replace "X?" with placeholder.
-        pat = re.sub(r"\w\?", placeholder, pat)
-    elif not re.search(r"\[[^\]]*\[", pat):  # Don't replace [...] inside other [...]
-        # Replace "[X]" with "X"
-        pat = re.sub(r"\[(.)\]", r"\1", pat)
-        # Replace character ranges with placeholder.
-        pat = re.sub(r"\[[^\]]+\][\+\?\*]?", placeholder, pat)
-    # Replace simple alternatives "(a|b)" or "(?:a|b)"
-    # with placeholder. Only replace if it's the only alternative in the pattern.
-    # Eg. "foo_(?:ue|\u00fc)xy" -> "foo__xy"
-    if pat.count("(") == 1:
-        pat = re.sub(r"\((?:\?:)?[^(]+\)", placeholder, pat)
-    # Select longest safe substring. If it is empty, None is returned below.
-    # Eg. "foo___xy" -> "foo" (where _ = placeholder)
-    pat = max(pat.split(placeholder), key=len)
-    # Remove any non-ASCII characters. Fast patterns will match against ASCII
-    # characters only (the same thing is done in the generated code).
-    pat = pat.encode("ascii", "ignore").decode()
-    # If any special regex characters are left in the pattern, refuse to generate
-    # a prematcher.
-    if pat and re.search(r"[^a-z\s0-9:/-]", pat) is None:
-        return pat
-    raise err("")
+
+    ast = sre_parse.parse(pat)
+    # Find longest streak of pure-literal nodes
+    literals = (
+        "".join(map(chr, literals_streak))
+        for literals_streak in _sre_find_streaks_of_literals(ast)
+    )
+    ascii_literals = (
+        literal.encode("ascii", "ignore").decode("ascii") for literal in literals
+    )
+    longest_literal = max(ascii_literals, key=len)
+    if longest_literal:
+        return longest_literal.lower()
+    else:
+        raise err("")
+
+
+def _sre_find_streaks_of_literals(ast):
+    i = 0
+    while i < len(ast):
+        chars = []
+        while i < len(ast) and ast[i][0] is sre_constants.LITERAL:
+            chars.append(cast(int, ast[i][1]))
+            i += 1
+        yield chars
+        i += 1
 
 
 def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V]":

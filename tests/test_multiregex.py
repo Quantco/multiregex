@@ -4,16 +4,7 @@ import re
 import pytest
 
 from multiregex import RegexMatcher, generate_prematcher
-
-
-def assert_matches(a, b):
-    def _normalize(pattern_match):
-        pattern, match = pattern_match
-        return (pattern, match if isinstance(match, str) else match.group())
-
-    a = type(a)(map(_normalize, a))
-    b = type(b)(map(_normalize, b))
-    assert a == b
+from test_utils import assert_matches_equal
 
 
 def test_basics():
@@ -22,7 +13,7 @@ def test_basics():
     matcher = RegexMatcher([date_re, time_re])
     assert not matcher.search("abc2022-01-01")
     matches = matcher.search("abc 2022-01-01 23:59:59")
-    assert_matches(
+    assert_matches_equal(
         matches,
         {
             (date_re, "2022-01-01"),
