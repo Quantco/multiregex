@@ -20,6 +20,7 @@ requirements:
     - setuptools_scm
   run:
     - python >=3.4
+    - pyahocorasick
 
 test:
   requires:
