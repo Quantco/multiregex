@@ -161,52 +161,41 @@ class RegexMatcher:
 
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
-        s = s.lower().encode("ascii", errors="ignore").decode()
+        s = to_lowercase_ascii(s)
         return set.union(
             set(), *(candidates for _, candidates in self._automaton.iter(s))
         )
 
 
-def generate_prematcher(pattern: Pattern, placeholder="\x01") -> str:
-    """Generate a fallback/default prematcher for the given regex `pattern`."""
+def to_lowercase_ascii(s: str) -> str:
+    return s.lower().encode("ascii", errors="ignore").decode()
 
-    def err(reason):
-        return ValueError(
-            "Could not generate prematcher {}: {!r}".format(reason, pattern.pattern)
-        )
 
-    pat = pattern.pattern
-    if pattern.flags & re.VERBOSE:
-        raise err(" for verbose pattern")
-    if placeholder in pat:
-        raise err(" for pattern containing placeholder{!r}".format(placeholder))
-    if re.search(r"\\[0-7]{3}", pat):
-        raise err(" containing octal escape")
-    if re.search(r"\\x", pat):
-        raise err(r" containing \x.. escape")
+def generate_prematcher(pattern: Pattern) -> str:
+    """Generate a fallback/default prematcher for the given regex `pattern`.
 
-    ast = sre_parse.parse(pat)
-    # Find longest streak of pure-literal nodes
+    Currently the fallback prematcher is just the longest literal text in the
+    pattern, eg. "Fast(er)? regex(es| matching)" -> " regex".
+    """
+    sre_ast = sre_parse.parse(pattern.pattern)
     literals = (
         "".join(map(chr, literals_streak))
-        for literals_streak in _sre_find_streaks_of_literals(ast)
+        for literals_streak in _sre_find_streaks_of_literals(sre_ast)
     )
-    ascii_literals = (
-        literal.encode("ascii", "ignore").decode("ascii") for literal in literals
-    )
+    ascii_literals = map(to_lowercase_ascii, literals)
     longest_literal = max(ascii_literals, key=len)
     if longest_literal:
         return longest_literal.lower()
     else:
-        raise err("")
+        raise ValueError("Could not generate prematcher {}".format(pattern.pattern))
 
 
-def _sre_find_streaks_of_literals(ast):
+def _sre_find_streaks_of_literals(sre_ast):
     i = 0
-    while i < len(ast):
+    while i < len(sre_ast):
         chars = []
-        while i < len(ast) and ast[i][0] is sre_constants.LITERAL:
-            chars.append(cast(int, ast[i][1]))
+        while i < len(sre_ast) and sre_ast[i][0] is sre_constants.LITERAL:
+            chars.append(cast(int, sre_ast[i][1]))
             i += 1
         yield chars
         i += 1
