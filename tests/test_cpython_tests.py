@@ -5,7 +5,7 @@ import re
 import pytest
 
 from multiregex import RegexMatcher, generate_prematcher
-from tests import cpython_test_re
+from test_utils import cpython_test_re
 
 
 def can_generate_prematcher(pattern):
