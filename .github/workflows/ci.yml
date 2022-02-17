@@ -38,6 +38,8 @@ jobs:
           python_version: ${{ matrix.PYTHON_VERSION }}
           src_folder: "multiregex"
           run_parallel: "false"
+        env:
+          PYTHONPATH: .
 
   linux-unittest-py34:
     name: "Linux - unit tests - Python 3.4"
