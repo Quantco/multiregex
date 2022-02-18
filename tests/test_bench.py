@@ -33,7 +33,8 @@ def test_python_parser():
 
 def test_parse_myself():
     myself = Path(__file__).parents[1] / "src" / "multiregex" / "__init__.py"
-    myself_src = myself.read_text().splitlines()
+    with myself.open() as f:
+        myself_src = f.read().splitlines()
     slow_matcher = make_slow_matcher(python_parser.values())
     fast_matcher = RegexMatcher(python_parser.values())
     slow_results = map(slow_matcher, myself_src)
