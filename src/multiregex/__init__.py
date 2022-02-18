@@ -85,7 +85,7 @@ class RegexMatcher:
     def validate_prematcher(prematcher):
         if (
             not prematcher
-            or not prematcher.isascii()
+            or not _isascii(prematcher)
             or any(map(str.isupper, prematcher))
         ):
             raise ValueError(
@@ -165,6 +165,14 @@ class RegexMatcher:
         return set.union(
             set(), *(candidates for _, candidates in self._automaton.iter(s))
         )
+
+
+def _isascii(s: str) -> bool:
+    try:
+        return s.isascii()
+    except AttributeError:
+        # Python < 3.7
+        return not any(ord(c) & 0x80 for c in s)
 
 
 def to_lowercase_ascii(s: str) -> str:
