@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
       - name: "Install Python 3.4"
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: 3.4
       - name: Checkout branch
@@ -151,7 +151,7 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
       - name: Install Python 3.8
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: 3.8
       - name: Run pre-commit checks
