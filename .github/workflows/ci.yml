@@ -20,13 +20,13 @@ jobs:
       - name: Pull image
         run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
       - name: Checkout branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Checkout github-actions repo
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: Quantco/github-actions
           ref: main
@@ -49,7 +49,7 @@ jobs:
         with:
           python-version: 3.4
       - name: Checkout branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
@@ -74,7 +74,7 @@ jobs:
         PYTHON_VERSION: ['3.6', '3.9']
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
@@ -107,16 +107,16 @@ jobs:
   #       run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
   #     - name: Checkout branch
   #       if: ${{ github.event_name != 'pull_request' }}
-  #       uses: actions/checkout@v2.4.0
+  #       uses: actions/checkout@v3
   #     - name: Checkout plain HEAD commit
   #       if: ${{ github.event_name == 'pull_request' }}
-  #       uses: actions/checkout@v2.4.0
+  #       uses: actions/checkout@v3
   #       with:
   #         ref: ${{ github.event.pull_request.head.sha }}
   #     - name: Fetch full git history
   #       run: git fetch --prune --unshallow
   #     - name: Checkout github-actions repo
-  #       uses: actions/checkout@v2.4.0
+  #       uses: actions/checkout@v3
   #       with:
   #         repository: Quantco/github-actions
   #         ref: main
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Install Python 3.8
@@ -171,13 +171,13 @@ jobs:
       - name: Pull image
         run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
       - name: Checkout branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Checkout github-actions repo
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
         with:
           repository: Quantco/github-actions
           ref: main
