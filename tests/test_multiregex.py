@@ -41,13 +41,20 @@ def test_ordered():
 @pytest.mark.parametrize(
     "pattern, prematcher",
     [
-        ("a", "a"),
-        ("[a]", "a"),
-        ("a[0-9]b", "a"),
-        ("a[0-9]+b", "a"),
-        ("a[0-9]*b", "a"),
-        ("a[0-9]?b", "a"),
-        ("a[x+]b", "a"),
+        ("a", {"a"}),
+        ("[a]", {"a"}),
+        ("a[0-9]b", {"a"}),
+        ("a[0-9]+b", {"a"}),
+        ("a[0-9]*b", {"a"}),
+        ("a[0-9]?b", {"a"}),
+        ("a[x+]b", {"a"}),
+        ("aaa|bb", {"aaa", "bb"}),
+        ("aaa|bb|c", {"aaa", "bb", "c"}),
+        ("aa[a-z]aaa|bb|c", {"aaa", "bb", "c"}),
+        ("aa|", None),
+        ("(aaa|bb)", {"aaa", "bb"}),
+        ("(aa|)", None),
+        ("(aa|(bb|cc))", None),
     ],
 )
 def test_generate_prematcher(pattern, prematcher):

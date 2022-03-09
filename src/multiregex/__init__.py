@@ -76,7 +76,7 @@ class RegexMatcher:
     @classmethod
     def generate_prematchers(cls, pattern: Pattern) -> Set[str]:
         """Generate prematchers for the given pattern."""
-        prematchers = {generate_prematcher(pattern)}
+        prematchers = generate_prematcher(pattern)
         for prematcher in prematchers:
             cls.validate_prematcher(prematcher)
         return prematchers
@@ -179,33 +179,62 @@ def to_lowercase_ascii(s: str) -> str:
     return s.lower().encode("ascii", errors="ignore").decode()
 
 
-def generate_prematcher(pattern: Pattern) -> str:
-    """Generate a fallback/default prematcher for the given regex `pattern`.
+def generate_prematcher(pattern: Pattern) -> Set[str]:
+    """Generate a fallback/default prematchers for the given regex `pattern`.
 
-    Currently the fallback prematcher is just the longest literal text in the
-    pattern, eg. "Fast(er)? regex(es| matching)" -> " regex".
+    Currently the fallback prematcher is just the longest terminal text in the
+    pattern, eg. "Fast(er)? regex(es| matching)" -> " regex". One level of
+    alternatives with the "|" character is supported, ie. "(a|bb|ccc)" -> "ccc".
     """
-    sre_ast = sre_parse.parse(pattern.pattern)
-    literals = (
-        "".join(map(chr, literals_streak))
-        for literals_streak in _sre_find_streaks_of_literals(sre_ast)
+
+    def _get_top_level_prematcher(sre_ast):
+        return max(
+            map(to_lowercase_ascii, _sre_find_terminals(sre_ast)), key=len, default=""
+        )
+
+    sre_ast = _simplify_sre_ast(sre_parse.parse(pattern.pattern))
+
+    # Simple case: We find a top-level terminal string (eg. r"Fast(er)" -> "Fast").
+    top_level_prematcher = _get_top_level_prematcher(sre_ast)
+    if top_level_prematcher:
+        return {top_level_prematcher}
+
+    # Branch case: We find a first-level terminal string in a branch (eg. r"(abc|de)" -> "abc").
+    # Each of the children must have a top-level simple prematcher. Nesting is not supported.
+    sre_branches = (
+        value[1] for type_, value in sre_ast if type_ == sre_constants.BRANCH
     )
-    ascii_literals = map(to_lowercase_ascii, literals)
-    longest_literal = max(ascii_literals, key=len)
-    if longest_literal:
-        return longest_literal.lower()
-    else:
-        raise ValueError("Could not generate prematcher {}".format(pattern.pattern))
+    for children in sre_branches:
+        simplified_children = map(_simplify_sre_ast, children)
+        child_prematchers = set(map(_get_top_level_prematcher, simplified_children))
+        print(child_prematchers)
+        if all(child_prematchers):
+            return child_prematchers
+
+    raise ValueError("Could not generate prematchers for {!r}".format(pattern.pattern))
 
 
-def _sre_find_streaks_of_literals(sre_ast):
+def _simplify_sre_ast(sre_ast):
+    """Simplify an sre AST.
+
+    - Transform pattern r"(...)" to r"...".
+    """
+    if len(sre_ast) == 1 and sre_ast[0][0] is sre_constants.SUBPATTERN:
+        group, add_flags, del_flags, p = sre_ast[0][1]
+        if not add_flags and not del_flags:
+            return p
+    return sre_ast
+
+
+def _sre_find_terminals(sre_ast):
+    """Find all terminals (streaks of LITERALs) in an sre AST."""
     i = 0
     while i < len(sre_ast):
         chars = []
         while i < len(sre_ast) and sre_ast[i][0] is sre_constants.LITERAL:
             chars.append(cast(int, sre_ast[i][1]))
             i += 1
-        yield chars
+        yield "".join(map(chr, chars))
         i += 1
 
 
