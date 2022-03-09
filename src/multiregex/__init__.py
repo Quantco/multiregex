@@ -220,9 +220,13 @@ def _simplify_sre_ast(sre_ast):
     - Transform pattern r"(...)" to r"...".
     """
     if len(sre_ast) == 1 and sre_ast[0][0] is sre_constants.SUBPATTERN:
-        group, add_flags, del_flags, p = sre_ast[0][1]
-        if not add_flags and not del_flags:
-            return p
+        if len(sre_ast[0][1]) == 2:
+            # Python < 3.6 has no subpattern flags support
+            return sre_ast[0][1][1]
+        else:
+            _, add_flags, del_flags, p = sre_ast[0][1]
+            if not add_flags and not del_flags:
+                return p
     return sre_ast
 
 
