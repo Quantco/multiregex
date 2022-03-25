@@ -31,5 +31,13 @@ test:
     - multiregex
 
 about:
-  home: https://github.com/quantco/multiregex
-  license: Proprietary
+  home: https://github.com/QuantCo/multiregex
+  license: BSD-3-Clause
+  license_family: BSD
+  license_file: LICENSE
+  summary: 'Quickly match many regexes against a string'
+  dev_url: https://github.com/QuantCo/multiregex
+
+extra:
+  recipe-maintainers:
+    - jonashaag
