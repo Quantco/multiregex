@@ -167,13 +167,9 @@ class RegexMatcher:
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
         s = to_lowercase_ascii(s)
-        return (
-            set.union(
-                set(),
-                *(candidates for _, candidates in self._automaton.iter(s)),
-            )
-            | {pattern for pattern, prematchers in self.patterns if not prematchers}
-        )
+        return set.union(
+            set(), *(candidates for _, candidates in self._automaton.iter(s))
+        ) | {pattern for pattern, prematchers in self.patterns if not prematchers}
 
 
 def _isascii(s: str) -> bool:
