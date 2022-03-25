@@ -26,7 +26,6 @@ from typing import (
     Dict,
     Iterable,
     List,
-    Match,
     Optional,
     Pattern,
     Set,
@@ -64,22 +63,30 @@ class RegexMatcher:
             `re.Pattern` (results from `re.compile`) or strings.
             If given as list of `(pattern, prematchers)` tuples, `prematchers`
             are custom prematchers (iterables of strings) or `None` for automatic
-            prematchers using `generate_prematchers`.
+            prematchers using `generate_prematchers`. To disable prematchers for
+            a specific pattern (ie., always run the "slow" matcher without any
+            prematching), use a `(pattern, []`) tuple.
         """
         patterns = self._normalize_patterns(patterns)
-        self.patterns = [
-            (pattern, prematchers or self.generate_prematchers(pattern))
+        prematchers_lists = [
+            prematchers
+            if prematchers is not None
+            else self.generate_prematchers(pattern)
             for pattern, prematchers in patterns
+        ]
+        for prematchers in prematchers_lists:
+            for prematcher in prematchers:
+                self.validate_prematcher(prematcher)
+        self.patterns = [
+            (pattern, prematchers)
+            for (pattern, _), prematchers in zip(patterns, prematchers_lists)
         ]
         self._automaton = self._make_automaton()
 
     @classmethod
     def generate_prematchers(cls, pattern: Pattern) -> Set[str]:
         """Generate prematchers for the given pattern."""
-        prematchers = generate_prematcher(pattern)
-        for prematcher in prematchers:
-            cls.validate_prematcher(prematcher)
-        return prematchers
+        return generate_prematcher(pattern)
 
     @staticmethod
     def validate_prematcher(prematcher):
@@ -95,22 +102,30 @@ class RegexMatcher:
             )
 
     @staticmethod
-    def _normalize_patterns(patterns) -> List[Tuple[Pattern, Set[str]]]:
+    def _normalize_patterns(patterns) -> List[Tuple[Pattern, Optional[Set[str]]]]:
         """Normalize `patterns` param given to `__init__`."""
-        if isinstance(patterns, str):
-            raise TypeError(
-                "Refusing to interpret {!r} as a list of patterns, pass a list of strings instead".format(
-                    patterns
+
+        def safe_set(iterable):
+            if isinstance(iterable, str):
+                raise TypeError(
+                    "Refusing to interpret {!r} as a list of patterns, pass a list of strings instead".format(
+                        iterable
+                    )
                 )
-            )
+            else:
+                return set(iterable)
+
         patterns = list(patterns)
         if patterns and not isinstance(patterns[0], tuple):
-            patterns = [(pattern, None) for pattern in patterns]
-        patterns = [
-            (re.compile(pattern), set(prematchers or ()))
-            for pattern, prematchers in patterns
-        ]
-        return patterns
+            return [(re.compile(pattern), None) for pattern in patterns]
+        else:
+            return [
+                (
+                    re.compile(pattern),
+                    None if prematchers is None else safe_set(prematchers),
+                )
+                for pattern, prematchers in patterns
+            ]
 
     def _make_automaton(self):
         """Create the pyahocorasick automaton."""
@@ -120,50 +135,44 @@ class RegexMatcher:
                 pattern_candidates_by_prematchers[prematcher].add(pattern)
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
-    def match(self, s) -> Set[Tuple[Pattern, Match]]:
-        """Quickly run `re.match` against `s` for all patterns."""
-        return self._match(s, re.match, ordered=False)
+    def run(self, match_func, s, enable_prematchers=True):
+        """Quickly run `match_func` against `s` for all patterns.
 
-    def match_ordered(self, s) -> List[Tuple[Pattern, Match]]:
-        """Quickly run `re.match` against `s` for all patterns.
-
-        Return results in the same order as `self.patterns` (potentially slower than `match`).
+        Parameters
+        ----------
+        match_func : Callable[str] -> Match
+            The base matching function, eg. `re.search`.
+        s : str
+            The string to match against.
+        enable_prematchers : bool (default True)
+            If false, do not use prematchers; use `match_func` only.
         """
-        return self._match(s, re.match, ordered=True)
-
-    def search(self, s) -> Set[Tuple[Pattern, Match]]:
-        """Quickly run `re.match` against `s` for all patterns."""
-        return self._match(s, re.search, ordered=False)
-
-    def search_ordered(self, s) -> List[Tuple[Pattern, Match]]:
-        """Quickly run `re.match` against `s` for all patterns.
-
-        Return results in the same order as `self.patterns` (potentially slower than `search`).
-        """
-        return self._match(s, re.search, ordered=True)
-
-    def _match(self, s, match_method, ordered):
-        candidates = list(self.get_pattern_candidates(s))
-        if ordered:
-            candidates = [
-                pattern for pattern, _ in self.patterns if pattern in candidates
-            ]
-        match_method = functools.partial(match_method, string=s)
-        matches = [
+        candidates = [pattern for pattern, _ in self.patterns]
+        if enable_prematchers:
+            candidates_set = self.get_pattern_candidates(s)
+            candidates = [p for p in candidates if p in candidates_set]
+        match_func = functools.partial(match_func, string=s)
+        return [
             (pattern, match)
-            for pattern, match in zip(candidates, map(match_method, candidates))
+            for pattern, match in zip(candidates, map(match_func, candidates))
             if match is not None
         ]
-        if ordered:
-            return matches
-        else:
-            return set(matches)
+
+    """Alias for ``run(re.match, ...)``."""
+    match = functools.partialmethod(run, re.match)
+
+    """Alias for ``run(re.search, ...)``."""
+    search = functools.partialmethod(run, re.search)
 
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
         s = to_lowercase_ascii(s)
-        return set.union(
-            set(), *(candidates for _, candidates in self._automaton.iter(s))
+        return (
+            set.union(
+                set(),
+                *(candidates for _, candidates in self._automaton.iter(s)),
+            )
+            | {pattern for pattern, prematchers in self.patterns if not prematchers}
         )
 
 
@@ -207,7 +216,6 @@ def generate_prematcher(pattern: Pattern) -> Set[str]:
     for children in sre_branches:
         simplified_children = map(_simplify_sre_ast, children)
         child_prematchers = set(map(_get_top_level_prematcher, simplified_children))
-        print(child_prematchers)
         if all(child_prematchers):
             return child_prematchers
 

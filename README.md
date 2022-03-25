@@ -35,16 +35,11 @@ matcher = multiregex.RegexMatcher(my_patterns)
 # Run `re.search` for all regexes.
 # Returns a set of matches as (re.Pattern, re.Match) tuples.
 matcher.search("john.doe@example.com")
-# => {(re.compile('\\w+@\\w+\\.com'), <re.Match ... 'doe@example.com'>),
-#     (re.compile('\\w+\\.com'), <re.Match ... 'example.com'>)}
+# => [(re.compile('\\w+@\\w+\\.com'), <re.Match ... 'doe@example.com'>),
+#     (re.compile('\\w+\\.com'), <re.Match ... 'example.com'>)]
 
 # Same as above, but with `re.match`.
 matcher.match(...)
-
-# To retrieve results in the same order as `my_patterns`, use:
-matcher.search_ordered("string")
-# => list of tuples
-# Note that this may be slower if `my_patterns` is very large.
 ```
 
 ### Custom prematchers
@@ -59,21 +54,30 @@ You will likely have to provide your own prematchers for all but the simplest
 regex patterns:
 
 ```py
-multiregex.RegexMatcher(["\d+"])
+multiregex.RegexMatcher([r"\d+"])
 # => ValueError: Could not generate prematcher : '\\d+'
 ```
 
 To provide custom prematchers, pass `(pattern, prematchers)` tuples:
 
 ```py
-multiregex.RegexMatcher([("\d+", map(str, range(10)))])
+multiregex.RegexMatcher([(r"\d+", map(str, range(10)))])
 ```
 
 To use a mixture of automatic and custom prematchers, pass `prematchers=None`:
 
 ```py
-matcher = multiregex.RegexMatcher([("\d+", map(str, range(10))), ("\w+\.com", None)])
+matcher = multiregex.RegexMatcher([(r"\d+", map(str, range(10))), (r"\w+\.com", None)])
 matcher.patterns
-# => [(re.compile('\\d+'), {'7', '8', '0', '1', '2', '6', '3', '5', '4', '9'}),
-#     (re.compile('\\w+\\.com'), {'com'})]
+# => [(re.compile('\\d+'), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']),
+#     (re.compile('\\w+\\.com'), ['com'])]
+```
+
+### Disabling prematchers
+
+To disable prematching for certain pattern entirely (ie., always run the regex
+without first running any prematchers), pass an empty list of prematchers:
+
+```py
+multiregex.RegexMatcher([(r"super complicated regex", [])])
 ```

@@ -15,10 +15,10 @@ def test_basics():
     matches = matcher.search("abc 2022-01-01 23:59:59")
     assert_matches_equal(
         matches,
-        {
+        [
             (date_re, "2022-01-01"),
             (time_re, "23:59:59"),
-        },
+        ],
     )
 
 
@@ -34,7 +34,7 @@ def test_ordered():
     patterns = [re.compile(c) for c in "abcdef"]
     random.shuffle(patterns)
     matcher = RegexMatcher(patterns)
-    matches = matcher.search_ordered("abcdef")
+    matches = matcher.search("abcdef")
     assert [p for p, _ in matches] == patterns
 
 
@@ -62,3 +62,15 @@ def test_generate_prematcher(pattern, prematcher):
         assert generate_prematcher(re.compile(pattern)) == prematcher
     except ValueError:
         assert prematcher is None
+
+
+@pytest.mark.parametrize(
+    "prematchers",
+    [
+        [""],
+        "abc",
+    ],
+)
+def test_invalid_prematchers(prematchers):
+    with pytest.raises((TypeError, ValueError)):
+        RegexMatcher([(re.compile(""), prematchers)])

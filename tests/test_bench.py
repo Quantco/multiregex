@@ -45,8 +45,8 @@ def test_parse_myself():
 
 def make_slow_matcher(patterns):
     patterns = [re.compile(pat) for pat in patterns]
-    return lambda s: {
+    return lambda s: [
         (pat, match)
         for pat, match in [(pat, pat.search(s)) for pat in patterns]
         if match is not None
-    }
+    ]

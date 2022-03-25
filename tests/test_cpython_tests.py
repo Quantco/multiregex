@@ -5,7 +5,7 @@ import re
 import pytest
 
 from multiregex import RegexMatcher, generate_prematcher
-from test_utils import cpython_test_re
+from test_utils import assert_matches_equal, cpython_test_re
 
 
 def can_generate_prematcher(pattern):
@@ -29,6 +29,8 @@ cpython_tests = [
 def test_patterns(pattern, s, outcome, expr, expected, flags):
     matcher = RegexMatcher([re.compile(pattern, flags)])
     result = matcher.search(s)
+    result_no_prematchers = matcher.search(s, enable_prematchers=False)
+    assert_matches_equal(result, result_no_prematchers)
     if outcome == cpython_test_re.FAIL:
         assert not result
     else:
