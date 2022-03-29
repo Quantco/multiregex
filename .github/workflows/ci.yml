@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { python-version: "3.4", os: ubuntu-18.04 }
+          - { python-version: "3.5", os: ubuntu-18.04 }
           - { python-version: "3.6", os: windows-2019 }
           - { python-version: "3.8", os: windows-latest }
           - { python-version: "3.9", os: ubuntu-latest }
@@ -34,12 +34,12 @@ jobs:
         with:
           extra-specs: |
             python=${{ matrix.python-version }}
-        if: matrix.python-version != '3.4'
-      - name: "Install Python 3.4"
+        if: matrix.python-version != '3.5'
+      - name: "Install Python 3.5"
         uses: actions/setup-python@v3
         with:
-          python-version: 3.4
-        if: matrix.python-version == '3.4'
+          python-version: 3.5
+        if: matrix.python-version == '3.5'
       - name: Install package
         run: |
           pip install --no-build-isolation --no-use-pep517 -e .
