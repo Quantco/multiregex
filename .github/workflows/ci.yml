@@ -43,7 +43,7 @@ jobs:
       - name: Run tests
         run: |
           if [ ${{ matrix.python-version }} = 3.4 ]; then
-            pip install pytest
+            pip install pytest pyahocorasick
             export PYTHONPATH=src
           else
             pip install -e .
