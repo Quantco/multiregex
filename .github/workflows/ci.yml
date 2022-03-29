@@ -44,7 +44,7 @@ jobs:
         run: |
           if [ ${{ matrix.python-version }} = 3.4 ]; then
             pip install pytest
-            PYTHONPATH=src
+            export PYTHONPATH=src
           else
             pip install -e .
           fi
