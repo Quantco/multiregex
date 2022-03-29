@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -42,11 +43,11 @@ jobs:
           python-version: 3.4
         if: matrix.python-version == '3.4'
       - name: Install package
-        run: pip install --no-build-isolation -e .
-      - name: Run tests
         run: |
+          pip install --no-build-isolation --no-build -e .
           pip install pytest
-          pytest -v tests/
+      - name: Run tests
+        run: pytest -v tests/
 
   pre-commit-checks:
     name: pre-commit checks
@@ -78,5 +79,5 @@ jobs:
         with:
           extra-specs: |
             boa
-      - name: Install package
+      - name: Build Conda package
         run: conda mambabuild conda.recipe
