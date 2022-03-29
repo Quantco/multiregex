@@ -44,7 +44,7 @@ jobs:
         if: matrix.python-version == '3.4'
       - name: Install package
         run: |
-          pip install --no-build-isolation --no-build -e .
+          pip install --no-build-isolation --no-use-pep517 -e .
           pip install pytest
       - name: Run tests
         run: pytest -v tests/
