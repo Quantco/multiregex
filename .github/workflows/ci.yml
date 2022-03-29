@@ -11,11 +11,10 @@ defaults:
 
 jobs:
   tests:
-    name: ${{ matrix.os }} - unit tests - Python ${{ matrix.python-version }}
-    timeout-minutes: 30
+    name: Tests - ${{ matrix.os }} - Python ${{ matrix.python-version }}
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'windows-latest']
         python-version: ['3.6', '3.9']
@@ -34,9 +33,9 @@ jobs:
       - name: Run tests
         run: pytest -v tests/
 
-  linux-unittest-py34:
-    name: "Linux - unit tests - Python 3.4"
-    timeout-minutes: 30
+  tests_py34:
+    name: Tests - ${{ matrix.os }} - Python ${{ matrix.python-version }}
+    timeout-minutes: 10
     runs-on: ubuntu-18.04
     steps:
       - name: "Install Python 3.4"
@@ -55,8 +54,8 @@ jobs:
         run: pytest -v tests/
 
   pre-commit-checks:
-    name: "Linux - pre-commit checks - Python 3.8"
-    timeout-minutes: 15
+    name: pre-commit checks
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -70,34 +69,19 @@ jobs:
       - name: Run pre-commit checks
         uses: pre-commit/action@v2.0.3
 
-        # TODO
-  # linux-conda-build:
-  #   name: "Linux - conda-build - Python ${{ matrix.python-version }}"
-  #   timeout-minutes: 30
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       python-version: ['3.8']
-  #   steps:
-  #     - name: Docker login
-  #       run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
-  #     - name: Pull image
-  #       run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
-  #     - name: Checkout branch
-  #       uses: actions/checkout@v3
-  #       with:
-  #         ref: ${{ github.head_ref }}
-  #     - name: Fetch full git history
-  #       run: git fetch --prune --unshallow
-  #     - name: Checkout github-actions repo
-  #       uses: actions/checkout@v3
-  #       with:
-  #         repository: Quantco/github-actions
-  #         ref: main
-  #         token: ${{ secrets.FQ_GH_TOKEN }}
-  #         path: .github/quantco-actions
-  #     - name: Run conda-build inside of container
-  #       uses: ./.github/quantco-actions/conda-build
-  #       with:
-  #         python_version: ${{ matrix.python-version }}
+  linux-conda-build:
+    name: Build Conda package
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up Conda env
+        uses: mamba-org/provision-with-micromamba@5fe88d370c741fc3567126d17c5af0b9620bd60d
+        with:
+          extra-specs: |
+            boa
+      - name: Install package
+        run: conda mambabuild conda.recipe
