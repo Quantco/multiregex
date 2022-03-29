@@ -44,11 +44,8 @@ jobs:
         run: |
           pip install --no-build-isolation --no-use-pep517 -e .
           pip install pytest
-          python -m multiregex
       - name: Run tests
-        run: |
-          python -m multiregex
-          pytest -v tests/
+        run: pytest -v tests/
 
   pre-commit-checks:
     name: pre-commit checks
