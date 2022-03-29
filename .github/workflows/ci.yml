@@ -24,7 +24,7 @@ jobs:
           - os: windows-latest
             python-version: "3.8"
           - os: windows-2019
-            python-versin: "3.6"
+            python-version: "3.6"
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
