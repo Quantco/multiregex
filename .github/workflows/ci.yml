@@ -28,7 +28,7 @@ jobs:
         uses: mamba-org/provision-with-micromamba@5fe88d370c741fc3567126d17c5af0b9620bd60d
         with:
           extra-specs: |
-            python=${{ matrix.PYTHON_VERSION }}
+            python=${{ matrix.python-version }}
       - name: Install package
         run: pip install --no-build-isolation -e .
       - name: Run tests
