@@ -16,8 +16,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'windows-latest']
-        python-version: ['3.6', '3.9']
+        include:
+          - os: ubuntu-latest
+            python-version: "3.9"
+          - os: ubuntu-18.04
+            python-version: "3.4"
+          - os: windows-latest
+            python-version: "3.8"
+          - os: windows-2019
+            python-versin: "3.6"
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
@@ -28,30 +35,18 @@ jobs:
         with:
           extra-specs: |
             python=${{ matrix.python-version }}
-      - name: Install package
-        run: pip install --no-build-isolation -e .
-      - name: Run tests
-        run: pytest -v tests/
-
-  tests_py34:
-    name: Tests - ${{ matrix.os }} - Python ${{ matrix.python-version }}
-    timeout-minutes: 10
-    runs-on: ubuntu-18.04
-    steps:
+        if: matrix.python-version != '3.4'
       - name: "Install Python 3.4"
         uses: actions/setup-python@v3
         with:
           python-version: 3.4
-      - name: Checkout branch
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
-      - name: Install package and test dependencies
-        run: |
-          pip install -e .
-          pip install pytest
+        if: matrix.python-version == '3.4'
+      - name: Install package
+        run: pip install --no-build-isolation -e .
       - name: Run tests
-        run: pytest -v tests/
+        run: |
+          pip install pytest
+          pytest -v tests/
 
   pre-commit-checks:
     name: pre-commit checks
