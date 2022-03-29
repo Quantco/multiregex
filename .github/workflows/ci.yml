@@ -10,7 +10,7 @@ defaults:
     shell: bash -el {0}
 
 jobs:
-  linux-unittests:
+  tests:
     name: "Linux - unit tests - Python ${{ matrix.python-version }}"
     timeout-minutes: 30
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
       - name: Set up Conda env
         uses: mamba-org/provision-with-micromamba@5fe88d370c741fc3567126d17c5af0b9620bd60d
         with:
-          extra-specs:
+          extra-specs: |
             python=${{ matrix.PYTHON_VERSION }}
       - name: Install package
         run: pip install --no-build-isolation -e .
