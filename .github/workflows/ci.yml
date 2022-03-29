@@ -30,7 +30,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@5fe88d370c741fc3567126d17c5af0b9620bd60d
+        uses: mamba-org/provision-with-micromamba@268cc19728703111bda67eb6e7328258ff6eb8b6
         with:
           extra-specs: |
             python=${{ matrix.python-version }}
@@ -68,6 +68,7 @@ jobs:
 
   linux-conda-build:
     name: Build Conda package
+    needs: [tests, pre-commit-checks]
     timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
@@ -78,8 +79,10 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@5fe88d370c741fc3567126d17c5af0b9620bd60d
+        uses: mamba-org/provision-with-micromamba@268cc19728703111bda67eb6e7328258ff6eb8b6
         with:
+          environment-file: false
+          channels: conda-forge
           extra-specs: |
             python=3.6
             boa
