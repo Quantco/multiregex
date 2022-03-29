@@ -13,7 +13,7 @@ jobs:
   tests:
     name: Tests - ${{ matrix.os }} - Python ${{ matrix.python-version }}
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
