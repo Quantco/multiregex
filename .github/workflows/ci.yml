@@ -21,7 +21,7 @@ jobs:
           - { python-version: "3.4", os: ubuntu-18.04 }
           - { python-version: "3.6", os: windows-2019 }
           - { python-version: "3.8", os: windows-latest }
-          - { python-version: "3.9", os: ubuntu-latest }
+          - { python-version: "3.10", os: ubuntu-latest }
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
@@ -85,7 +85,7 @@ jobs:
           environment-name: build
           channels: conda-forge
           extra-specs: |
-            python=3.7
+            python=3.9
             boa
       - name: Build Conda package
         run: conda mambabuild conda.recipe
