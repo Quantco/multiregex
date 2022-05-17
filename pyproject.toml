@@ -4,9 +4,7 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "multiregex"
-authors = [
-  {name = "Jonas Haag", email = "jonas.haag@quantco.com"}
-]
+authors = [{name="QuantCo, Inc.", email="noreply@quantco.com"}]
 
 maintainers = [{name = "Jonas Haag", email = "jonas.haag@quantco.com"}]
 
