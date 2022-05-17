@@ -65,27 +65,3 @@ jobs:
           python-version: "3.10"
       - name: Run pre-commit checks
         uses: pre-commit/action@v3.0.0
-
-  linux-conda-build:
-    name: Build Conda package
-    needs: [tests, pre-commit-checks]
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.head_ref }}
-      - name: Fetch full git history
-        run: git fetch --prune --unshallow
-      - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@e2b397b12d0a38069451664382b769c9456e3d6d
-        with:
-          environment-file: false
-          environment-name: build
-          channels: conda-forge
-          extra-specs: |
-            python=3.9
-            boa
-      - name: Build Conda package
-        run: conda mambabuild conda.recipe
