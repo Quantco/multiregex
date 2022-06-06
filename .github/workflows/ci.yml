@@ -64,7 +64,7 @@ jobs:
         with:
           python-version: "3.10"
       - name: Run pre-commit checks
-        uses: pre-commit/action@v2.0.3
+        uses: pre-commit/action@v3.0.0
 
   linux-conda-build:
     name: Build Conda package
