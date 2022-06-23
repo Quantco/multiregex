@@ -187,9 +187,9 @@ def to_lowercase_ascii(s: str) -> str:
 def generate_prematcher(pattern: Pattern) -> Set[str]:
     """Generate a fallback/default prematchers for the given regex `pattern`.
 
-    Currently the fallback prematcher is just the longest terminal text in the
-    pattern, eg. "Fast(er)? regex(es| matching)" -> " regex". One level of
-    alternatives with the "|" character is supported, ie. "(a|bb|ccc)" -> "ccc".
+    Currently the fallback prematcher is just the set of longest terminal texts
+    in the pattern, eg. "Fast(er)? regex(es| matching)" -> {" regex"}. One level of
+    branches with the "|" character is supported, ie. "(a|bb|ccc)" -> {"ccc", "a", "bb"}.
     """
 
     def _get_top_level_prematcher(sre_ast):
@@ -204,7 +204,7 @@ def generate_prematcher(pattern: Pattern) -> Set[str]:
     if top_level_prematcher:
         return {top_level_prematcher}
 
-    # Branch case: We find a first-level terminal string in a branch (eg. r"(abc|de)" -> "abc").
+    # Branch case: We find a first-level terminal string in a branch (eg. r"(abc|de)" -> {"abc", "de"}).
     # Each of the children must have a top-level simple prematcher. Nesting is not supported.
     sre_branches = (
         value[1] for type_, value in sre_ast if type_ == sre_constants.BRANCH
