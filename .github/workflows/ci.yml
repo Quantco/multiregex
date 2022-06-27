@@ -30,7 +30,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@268cc19728703111bda67eb6e7328258ff6eb8b6
+        uses: mamba-org/provision-with-micromamba@34071ca7df4983ccd272ed0d3625818b27b70dcc
         with:
           extra-specs: |
             python=${{ matrix.python-version }}
@@ -79,7 +79,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@268cc19728703111bda67eb6e7328258ff6eb8b6
+        uses: mamba-org/provision-with-micromamba@34071ca7df4983ccd272ed0d3625818b27b70dcc
         with:
           environment-file: false
           environment-name: build
