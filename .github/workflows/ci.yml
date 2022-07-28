@@ -48,7 +48,7 @@ jobs:
           else
             pip install -e .
           fi
-          pytest --colors=yes -v tests/
+          pytest --color=yes -v tests/
 
   pre-commit-checks:
     name: pre-commit checks
