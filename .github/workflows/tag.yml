@@ -1,0 +1,96 @@
+name: Deploy on tag
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  linux-deployment:
+    name: "Linux - deployment - Python ${{ matrix.PYTHON_VERSION }}"
+    runs-on: ubuntu-latest
+    env:
+      CI: True
+      CONDA_CHANNEL_UPLOAD_USER: ${{ secrets.CONDA_CHANNEL_UPLOAD_USER }}
+      CONDA_CHANNEL_UPLOAD_PASSWORD: ${{ secrets.CONDA_CHANNEL_UPLOAD_PASSWORD }}
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8']
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Fetch tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Fetch all
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v3.3.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - name: Deploy package from container
+        uses: ./.github/quantco-actions/deployment
+        with:
+          python_version: ${{ matrix.PYTHON_VERSION }}
+          api_key: ${{ secrets.QUETZ_API_KEY }}
+
+  docs:
+    name: "Documentation"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    env:
+      CI: True
+      CONDA_CHANNEL_UPLOAD_USER: ${{ secrets.CONDA_CHANNEL_UPLOAD_USER }}
+      CONDA_CHANNEL_UPLOAD_PASSWORD: ${{ secrets.CONDA_CHANNEL_UPLOAD_PASSWORD }}
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8']
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Fetch tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+      - name: Fetch all
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v3.3.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - uses: google-github-actions/auth@v1.0.0
+        with:
+          workload_identity_provider: "projects/610600912298/locations/global/workloadIdentityPools/doqker-devel-github-actions-pool/providers/github-actions-provider"
+          service_account: 'sa-github-actions@doqker-devel.iam.gserviceaccount.com'
+          token_format: 'access_token'
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+        with:
+          version: '408.0.0'
+          project_id: ${{ secrets.GCP_UPLOAD_PROJECT_ID }}
+          export_default_credentials: true
+      - name: Run doc build inside of container
+        uses: ./.github/quantco-actions/docs
+        with:
+          python_version: ${{ matrix.PYTHON_VERSION }}
+          conda_api_key: "${{ secrets.QUETZ_API_KEY }}"
+      - name: Publish Docs as tagged
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/$(echo ${GITHUB_REF} | cut -d / -f 3 -)/

@@ -1,30 +1,32 @@
 name: CI
-on:
-  push:
-    branches:
-      - main
-  pull_request:
+on: [push]
+
+# Automatically stop old builds on the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 defaults:
   run:
     shell: bash -el {0}
 
+env:
+  CONDA_CHANNEL_UPLOAD_USER: ${{ secrets.CONDA_CHANNEL_UPLOAD_USER }}
+  CONDA_CHANNEL_UPLOAD_PASSWORD: ${{ secrets.CONDA_CHANNEL_UPLOAD_PASSWORD }}
+  CONDA_API_KEY: ${{ secrets.QUETZ_API_KEY }}
+
 jobs:
-  tests:
-    name: Tests - Python ${{ matrix.python-version }} - ${{ matrix.os }}
-    timeout-minutes: 10
-    runs-on: ${{ matrix.os }}
+  linux-unittests:
+    name: "Linux - unit tests - Python ${{ matrix.PYTHON_VERSION }}"
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { python-version: "3.4", os: ubuntu-18.04 }
-          - { python-version: "3.6", os: windows-2019 }
-          - { python-version: "3.8", os: windows-latest }
-          - { python-version: "3.10", os: ubuntu-latest }
+        PYTHON_VERSION: ['3.8', '3.9', '3.10']
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.3.0
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
@@ -32,60 +34,126 @@ jobs:
       - name: Set up Conda env
         uses: mamba-org/provision-with-micromamba@f347426e5745fe3dfc13ec5baf20496990d0281f
         with:
+          condarc-file: .github/workflows/.condarc
+          cache-env: true
           extra-specs: |
-            python=${{ matrix.python-version }}
-        if: matrix.python-version != '3.4'
-      - name: "Install Python 3.4"
-        uses: actions/setup-python@v4
+            python=${{ matrix.PYTHON_VERSION }}
+            pytest-md
+            pytest-emoji
+      - name: Install repository
+        run: python -m pip install --no-build-isolation --no-deps --disable-pip-version-check -e .
+      - name: Checkout Quantco/pytest-action
+        uses: actions/checkout@v3.3.0
         with:
-          python-version: 3.4
-        if: matrix.python-version == '3.4'
-      - name: Run tests
-        run: |
-          if [ ${{ matrix.python-version }} = 3.4 ]; then
-            pip install pytest pyahocorasick
-            export PYTHONPATH=src
-          else
-            pip install -e .
-          fi
-          pytest -v tests/
+          repository: Quantco/pytest-action
+          ref: v2
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/pytest-action
+      - name: Run unittests
+        uses: ./.github/pytest-action
+        with:
+          report-title: "Unit tests Linux - Python ${{ matrix.PYTHON_VERSION }}"
+          custom-arguments: --cov-report=xml ./tests
+  docs:
+    name: "Documentation - build & upload"
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    strategy:
+      fail-fast: false
+    steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
+      - name: Checkout branch
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/checkout@v3.3.0
+      - name: Checkout plain HEAD commit
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Fetch full git history
+        run: git fetch --prune --unshallow
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v3.3.0
+        with:
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - uses: google-github-actions/auth@v1.0.0
+        with:
+          workload_identity_provider: "projects/610600912298/locations/global/workloadIdentityPools/doqker-devel-github-actions-pool/providers/github-actions-provider"
+          service_account: 'sa-github-actions@doqker-devel.iam.gserviceaccount.com'
+          token_format: 'access_token'
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+        with:
+          version: '408.0.0'
+          project_id: ${{ secrets.GCP_UPLOAD_PROJECT_ID }}
+          export_default_credentials: true
+      - name: Run doc build inside of container
+        uses: ./.github/quantco-actions/docs
+        with:
+          conda_api_key: "${{ secrets.QUETZ_API_KEY }}"
+      - name: Publish Docs
+        if: ${{ github.event_name != 'pull_request' }}
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/${GITHUB_SHA}/
+      - name: Publish Docs
+        if: ${{ github.event_name == 'pull_request' }}
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/${{ github.event.pull_request.head.sha }}/
+      - name: Publish Docs as latest
+        run: cd docs/_build/html && gsutil -m cp -r * gs://qc-github-artifacts/${GITHUB_REPOSITORY}/latest/
+        if: github.ref == 'refs/heads/main'
 
   pre-commit-checks:
-    name: pre-commit checks
-    timeout-minutes: 10
+    name: "Linux - pre-commit checks - Python 3.8"
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.3.0
         with:
           ref: ${{ github.head_ref }}
-      - name: Install Python 3.10
+      - name: Install Python 3.8
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: 3.8
       - name: Run pre-commit checks
         uses: pre-commit/action@v3.0.0
 
   linux-conda-build:
-    name: Build Conda package
-    needs: [tests, pre-commit-checks]
-    timeout-minutes: 10
+    name: "Linux - conda-build - Python ${{ matrix.PYTHON_VERSION }}"
+    timeout-minutes: 30
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        PYTHON_VERSION: ['3.8']
     steps:
+      - name: Docker login
+        run: docker login ghcr.io -u "${{ github.actor }}" -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Pull image
+        run: docker pull ghcr.io/quantco/qc-mambaforge-base:latest
       - name: Checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.3.0
         with:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
         run: git fetch --prune --unshallow
-      - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@f347426e5745fe3dfc13ec5baf20496990d0281f
+      - name: Checkout github-actions repo
+        uses: actions/checkout@v3.3.0
         with:
-          environment-file: false
-          environment-name: build
-          channels: conda-forge
-          extra-specs: |
-            python=3.9
-            boa
-      - name: Build Conda package
-        run: conda mambabuild conda.recipe
+          repository: Quantco/github-actions
+          ref: main
+          token: ${{ secrets.FQ_GH_TOKEN }}
+          path: .github/quantco-actions
+      - name: Run conda-build inside of container
+        uses: ./.github/quantco-actions/conda-build
+        with:
+          python_version: ${{ matrix.PYTHON_VERSION }}
+          conda_api_key: "${{ secrets.QUETZ_API_KEY }}"
