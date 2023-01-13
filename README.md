@@ -22,7 +22,6 @@ pre-commit install
 pip install --no-build-isolation -e .
 ```
 
-
 ## Usage
 
 ```py

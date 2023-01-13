@@ -1,4 +1,6 @@
-r"""Speed up regex matching with non-regex substring "prematchers", similar to Bloom filters.
+r"""
+Speed up regex matching with non-regex substring "prematchers", similar to Bloom
+filters.
 
 For each regex pattern we use a list of simple (non-regex) substring prematchers.
 When evaluating regex patterns on a string, we use the prematchers to restrict
@@ -136,7 +138,8 @@ class RegexMatcher:
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
     def run(self, match_func, s, enable_prematchers=True):
-        """Quickly run `match_func` against `s` for all patterns.
+        """
+        Quickly run `match_func` against `s` for all patterns.
 
         Parameters
         ----------
@@ -185,11 +188,12 @@ def to_lowercase_ascii(s: str) -> str:
 
 
 def generate_prematcher(pattern: Pattern) -> Set[str]:
-    """Generate a fallback/default prematchers for the given regex `pattern`.
+    """
+    Generate a fallback/default prematchers for the given regex `pattern`.
 
-    Currently the fallback prematcher is just the set of longest terminal texts
-    in the pattern, eg. "Fast(er)? regex(es| matching)" -> {" regex"}. One level of
-    branches with the "|" character is supported, ie. "(a|bb|ccc)" -> {"ccc", "a", "bb"}.
+    Currently the fallback prematcher is just the set of longest terminal texts in the
+    pattern, eg. "Fast(er)? regex(es| matching)" -> {" regex"}. One level of branches
+    with the "|" character is supported, ie. "(a|bb|ccc)" -> {"ccc", "a", "bb"}.
     """
 
     def _get_top_level_prematcher(sre_ast):
@@ -215,11 +219,12 @@ def generate_prematcher(pattern: Pattern) -> Set[str]:
         if all(child_prematchers):
             return child_prematchers
 
-    raise ValueError("Could not generate prematchers for {!r}".format(pattern.pattern))
+    raise ValueError(f"Could not generate prematchers for {pattern.pattern!r}")
 
 
 def _simplify_sre_ast(sre_ast):
-    """Simplify an sre AST.
+    """
+    Simplify an sre AST.
 
     - Transform pattern r"(...)" to r"...".
     """

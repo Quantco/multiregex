@@ -40,4 +40,3 @@ wrap-summaries = 88
 [tool.pytest.ini_options]
 # This will be pytest's future default.
 addopts = "--import-mode=importlib --cov=multiregex"
-

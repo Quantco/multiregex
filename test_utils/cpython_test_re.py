@@ -1,6 +1,6 @@
+#!/usr/bin/env python3
 # Verbatim copy of https://github.com/python/cpython/blob/main/Lib/test/test_re.py @6f1efd19a70839d480e4b1fcd9fecd3a8725824b.
 # fmt: off
-#!/usr/bin/env python3
 # -*- mode: python -*-
 
 # Re test suite and benchmark suite v1.5
@@ -25,9 +25,9 @@ benchmarks = [
     ('Python|Perl|Tcl', 'Perl'),        # Alternation
     ('(Python|Perl|Tcl)', 'Perl'),      # Grouped alternation
 
-    ('(Python)\\1', 'PythonPython'),    # Backreference
-    ('([0a-z][a-z0-9]*,)+', 'a5,b7,c9,'), # Disable the fastmap optimization
-    ('([a-z][a-z0-9]*,)+', 'a5,b7,c9,'), # A few sets
+    ('(Python)\\1', 'PythonPython'),       # Backreference
+    ('([0a-z][a-z0-9]*,)+', 'a5,b7,c9,'),  # Disable the fastmap optimization
+    ('([a-z][a-z0-9]*,)+', 'a5,b7,c9,'),   # A few sets
 
     ('Python', 'Python'),               # Simple text literal
     ('.*Python', 'Python'),             # Bad text literal
@@ -302,9 +302,9 @@ tests = [
     ('^(ab|cd)e', 'abcde', FAIL),
     ('((((((((((a))))))))))', 'a', SUCCEED, 'g10', 'a'),
     ('((((((((((a))))))))))\\10', 'aa', SUCCEED, 'found', 'aa'),
-# Python does not have the same rules for \\41 so this is a syntax error
-#    ('((((((((((a))))))))))\\41', 'aa', FAIL),
-#    ('((((((((((a))))))))))\\41', 'a!', SUCCEED, 'found', 'a!'),
+    # Python does not have the same rules for \\41 so this is a syntax error
+    # ('((((((((((a))))))))))\\41', 'aa', FAIL),
+    # ('((((((((((a))))))))))\\41', 'a!', SUCCEED, 'found', 'a!'),
     ('((((((((((a))))))))))\\41', '', SYNTAX_ERROR),
     ('(?i)((((((((((a))))))))))\\41', '', SYNTAX_ERROR),
     ('(?i)abc', 'ABC', SUCCEED, 'found', 'ABC'),
@@ -424,8 +424,8 @@ tests = [
     ('(?i)(bc+d$|ef*g.|h?i(j|k))', 'REFFGZ', SUCCEED, 'found+"-"+g1+"-"+g2', 'EFFGZ-EFFGZ-None'),
     ('(?i)((((((((((a))))))))))', 'A', SUCCEED, 'g10', 'A'),
     ('(?i)((((((((((a))))))))))\\10', 'AA', SUCCEED, 'found', 'AA'),
-    #('(?i)((((((((((a))))))))))\\41', 'AA', FAIL),
-    #('(?i)((((((((((a))))))))))\\41', 'A!', SUCCEED, 'found', 'A!'),
+    # ('(?i)((((((((((a))))))))))\\41', 'AA', FAIL),
+    # ('(?i)((((((((((a))))))))))\\41', 'A!', SUCCEED, 'found', 'A!'),
     ('(?i)(((((((((a)))))))))', 'A', SUCCEED, 'found', 'A'),
     ('(?i)(?:(?:(?:(?:(?:(?:(?:(?:(?:(a))))))))))', 'A', SUCCEED, 'g1', 'A'),
     ('(?i)(?:(?:(?:(?:(?:(?:(?:(?:(?:(a|b|c))))))))))', 'C', SUCCEED, 'g1', 'C'),
@@ -434,8 +434,8 @@ tests = [
     ('(?i)(.*)c(.*)', 'ABCDE', SUCCEED, 'found+"-"+g1+"-"+g2', 'ABCDE-AB-DE'),
     ('(?i)\\((.*), (.*)\\)', '(A, B)', SUCCEED, 'g2+"-"+g1', 'B-A'),
     ('(?i)[k]', 'AB', FAIL),
-#    ('(?i)abcd', 'ABCD', SUCCEED, 'found+"-"+\\found+"-"+\\\\found', 'ABCD-$&-\\ABCD'),
-#    ('(?i)a(bc)d', 'ABCD', SUCCEED, 'g1+"-"+\\g1+"-"+\\\\g1', 'BC-$1-\\BC'),
+    # ('(?i)abcd', 'ABCD', SUCCEED, 'found+"-"+\\found+"-"+\\\\found', 'ABCD-$&-\\ABCD'),
+    # ('(?i)a(bc)d', 'ABCD', SUCCEED, 'g1+"-"+\\g1+"-"+\\\\g1', 'BC-$1-\\BC'),
     ('(?i)a[-]?c', 'AC', SUCCEED, 'found', 'AC'),
     ('(?i)(abc)\\1', 'ABCABC', SUCCEED, 'g1', 'ABC'),
     ('(?i)([a-c]*)\\1', 'ABCABC', SUCCEED, 'g1', 'ABC'),
@@ -448,11 +448,11 @@ tests = [
     ('a(?:b|(c|e){1,2}?|d)+?(.)', 'ace', SUCCEED, 'g1 + g2', 'ce'),
 
     # lookbehind: split by : but not if it is escaped by -.
-    ('(?<!-):(.*?)(?<!-):', 'a:bc-:de:f', SUCCEED, 'g1', 'bc-:de' ),
+    ('(?<!-):(.*?)(?<!-):', 'a:bc-:de:f', SUCCEED, 'g1', 'bc-:de'),
     # escaping with \ as we know it
-    ('(?<!\\\\):(.*?)(?<!\\\\):', 'a:bc\\:de:f', SUCCEED, 'g1', 'bc\\:de' ),
+    ('(?<!\\\\):(.*?)(?<!\\\\):', 'a:bc\\:de:f', SUCCEED, 'g1', 'bc\\:de'),
     # terminating with ' and escaping with ? as in edifact
-    ("(?<!\\?)'(.*?)(?<!\\?)'", "a'bc?'de'f", SUCCEED, 'g1', "bc?'de" ),
+    ("(?<!\\?)'(.*?)(?<!\\?)'", "a'bc?'de'f", SUCCEED, 'g1', "bc?'de"),
 
     # Comments using the (?#...) syntax
 
@@ -505,7 +505,7 @@ xyzabc
     # (r'\x00ff', '\377', SUCCEED, 'found', chr(255)),
     (r'\t\n\v\r\f\a', '\t\n\v\r\f\a', SUCCEED, 'found', '\t\n\v\r\f\a'),
     ('\t\n\v\r\f\a', '\t\n\v\r\f\a', SUCCEED, 'found', '\t\n\v\r\f\a'),
-    (r'\t\n\v\r\f\a', '\t\n\v\r\f\a', SUCCEED, 'found', chr(9)+chr(10)+chr(11)+chr(13)+chr(12)+chr(7)),
+    (r'\t\n\v\r\f\a', '\t\n\v\r\f\a', SUCCEED, 'found', chr(9) + chr(10) + chr(11) + chr(13) + chr(12) + chr(7)),
     (r'[\t][\n][\v][\r][\f][\b]', '\t\n\v\r\f\b', SUCCEED, 'found', '\t\n\v\r\f\b'),
 
     #
@@ -533,7 +533,7 @@ xyzabc
     (r'a[ ]*?\ (\d+).*', 'a   10', SUCCEED, 'found', 'a   10'),
     (r'a[ ]*?\ (\d+).*', 'a    10', SUCCEED, 'found', 'a    10'),
     # bug 127259: \Z shouldn't depend on multiline mode
-    (r'(?ms).*?x\s*\Z(.*)','xx\nx\n', SUCCEED, 'g1', ''),
+    (r'(?ms).*?x\s*\Z(.*)', 'xx\nx\n', SUCCEED, 'g1', ''),
     # bug 128899: uppercase literals under the ignorecase flag
     (r'(?i)M+', 'MMM', SUCCEED, 'found', 'MMM'),
     (r'(?i)m+', 'MMM', SUCCEED, 'found', 'MMM'),
