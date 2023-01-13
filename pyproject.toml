@@ -16,6 +16,7 @@ exclude = '''
 '''
 
 [tool.isort]
+profile = "black"
 multi_line_output = 3
 include_trailing_comma = true
 ensure_newline_before_comments = true
@@ -25,11 +26,18 @@ skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
 default_section = 'THIRDPARTY'
 
 [tool.mypy]
-python_version = 3.8
+python_version = '3.8'
 ignore_missing_imports = true
 no_implicit_optional = true
 check_untyped_defs = true
 
+[tool.docformatter]
+pre-summary-newline = true
+recursive = true
+wrap-descriptions = 88
+wrap-summaries = 88
+
 [tool.pytest.ini_options]
 # This will be pytest's future default.
-addopts = "--import-mode=importlib"
+addopts = "--import-mode=importlib --cov=multiregex"
+

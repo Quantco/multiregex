@@ -15,11 +15,11 @@ build:
 
 requirements:
   host:
-    - python >=3.6
+    - python >=3.8
     - pip
     - setuptools_scm
   run:
-    - python >=3.6
+    - python >=3.8
     - pyahocorasick
 
 test:
@@ -31,7 +31,7 @@ test:
     - multiregex
 
 about:
-  home: https://github.com/QuantCo/multiregex
+  home: https://github.com/quantco/multiregex
   license: BSD-3-Clause
   license_family: BSD
   license_file: LICENSE

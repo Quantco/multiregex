@@ -1,19 +1,18 @@
 name: multiregex
 channels:
+  - qc-internal
   - conda-forge
   - nodefaults
 dependencies:
-  - python>=3.4
+  - python>=3.8
   - pyahocorasick
+  - make
+  - numpydoc
   - pip
   - pre-commit
   - pytest>=6  # Adds --import-mode option
   - pytest-cov
-
-  # Docs
-  # - make
-  # - numpydoc
-  # - setuptools_scm
-  # - sphinx
-  # - sphinxcontrib-apidoc
-  # - sphinx_rtd_theme
+  - setuptools_scm
+  - sphinx
+  - sphinxcontrib-apidoc
+  - sphinx_rtd_theme

@@ -17,6 +17,7 @@
 
 # -- Project information -----------------------------------------------------
 
+import datetime
 import importlib
 import inspect
 import os
@@ -29,7 +30,7 @@ _mod = importlib.import_module("multiregex")
 
 
 project = "multiregex"
-copyright = "2019, QuantCo, Inc."
+copyright = f"{datetime.date.today().year}, QuantCo, Inc"
 author = "QuantCo, Inc."
 
 extensions = [
@@ -38,7 +39,7 @@ extensions = [
     "sphinxcontrib.apidoc",
 ]
 
-apidoc_module_dir = "../src/multiregex"
+apidoc_module_dir = "../multiregex"
 apidoc_output_dir = "api"
 apidoc_separate_modules = True
 apidoc_extra_args = ["--implicit-namespaces"]
