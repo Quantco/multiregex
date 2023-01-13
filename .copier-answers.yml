@@ -1,11 +1,10 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 35377c3
-_src_path: git@github.com:Quantco/copier-template-python
+_commit: 1d5c63e
+_src_path: git@github.com:Quantco/copier-template-python.git
 add_windows_tests_to_ci: false
 github_remote: git@github.com:quantco/multiregex.git
 github_user: jonashaag
+project_license: BSD-3-Clause
 project_name: multiregex
-project_short_description: Quickly match many regexes against a string. Provides 2-10x
-    speedups over naïve regex matching.
+project_short_description: Quickly match many regexes against a string.
 project_slug: multiregex
-
