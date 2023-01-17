@@ -1,7 +1,5 @@
-channel_alias: https://conda.prod.quantco.cloud/t/${CONDA_API_KEY}/get
 
 channels:
-  - qc-internal
   - conda-forge
 
 custom_multichannels:

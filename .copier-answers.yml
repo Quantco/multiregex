@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: 1d5c63e
+_commit: 600b9cd
 _src_path: git@github.com:Quantco/copier-template-python.git
 add_windows_tests_to_ci: false
 github_remote: git@github.com:quantco/multiregex.git
@@ -8,3 +8,4 @@ project_license: BSD-3-Clause
 project_name: multiregex
 project_short_description: Quickly match many regexes against a string.
 project_slug: multiregex
+use_qc_internal: false

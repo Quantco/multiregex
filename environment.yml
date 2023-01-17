@@ -1,6 +1,5 @@
 name: multiregex
 channels:
-  - qc-internal
   - conda-forge
   - nodefaults
 dependencies:
