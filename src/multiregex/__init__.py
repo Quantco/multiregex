@@ -81,6 +81,11 @@ class RegexMatcher:
             (pattern, prematchers)
             for (pattern, _), prematchers in zip(patterns, prematchers_lists)
         ]
+        # Pre-computed versions of self.patterns derivations.
+        self._patterns_only_pattern = [pattern for pattern, _ in self.patterns]
+        self._patterns_always_candidates = {
+            pattern for pattern, prematchers in self.patterns if not prematchers
+        }
         self._automaton = self._make_automaton()
 
     @classmethod
@@ -147,16 +152,35 @@ class RegexMatcher:
         enable_prematchers : bool (default True)
             If false, do not use prematchers; use `match_func` only.
         """
-        candidates = [pattern for pattern, _ in self.patterns]
+        candidates = self._patterns_only_pattern
         if enable_prematchers:
             candidates_set = self.get_pattern_candidates(s)
             candidates = [p for p in candidates if p in candidates_set]
-        match_func = functools.partial(match_func, string=s)
-        return [
-            (pattern, match)
-            for pattern, match in zip(candidates, map(match_func, candidates))
-            if match is not None
-        ]
+        # Inlined versions for match_func = re.match/search, up to 30% faster.
+        if match_func is re.match:
+            return [
+                (pattern, match)
+                for pattern, match in [
+                    (pattern, pattern.match(s)) for pattern in candidates
+                ]
+                if match is not None
+            ]
+        elif match_func is re.search:
+            return [
+                (pattern, match)
+                for pattern, match in [
+                    (pattern, pattern.search(s)) for pattern in candidates
+                ]
+                if match is not None
+            ]
+        else:
+            return [
+                (pattern, match)
+                for pattern, match in [
+                    (pattern, match_func(pattern, s)) for pattern in candidates
+                ]
+                if match is not None
+            ]
 
     """Alias for ``run(re.match, ...)``."""
     match = functools.partialmethod(run, re.match)
@@ -167,9 +191,9 @@ class RegexMatcher:
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
         s = to_lowercase_ascii(s)
-        return set.union(
-            set(), *(candidates for _, candidates in self._automaton.iter(s))
-        ) | {pattern for pattern, prematchers in self.patterns if not prematchers}
+        return self._patterns_always_candidates.union(
+            *(candidates for _, candidates in self._automaton.iter(s))
+        )
 
 
 def _isascii(s: str) -> bool:
