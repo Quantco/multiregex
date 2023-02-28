@@ -68,7 +68,6 @@ class RegexMatcher:
         patterns: Iterable[
             Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
-        *,
         count_prematcher_false_positives=False,
     ):
         """
