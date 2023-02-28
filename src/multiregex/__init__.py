@@ -48,12 +48,28 @@ V = TypeVar("V")
 PatternOrStr = Union[Pattern, str]
 
 
+class SuccessCounter:
+    def __init__(self):
+        self.attempts = 0
+        self.successful_attempts = 0
+
+    def record_attempt(self, successful) -> None:
+        self.attempts += 1
+        if successful:
+            self.successful_attempts += 1
+
+    def compute_success_rate(self) -> float:
+        return self.successful_attempts / self.attempts
+
+
 class RegexMatcher:
     def __init__(
         self,
         patterns: Iterable[
             Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
+        *,
+        count_prematcher_false_positives=False,
     ):
         """
         Parameters
@@ -87,6 +103,12 @@ class RegexMatcher:
             pattern for pattern, prematchers in self.patterns if not prematchers
         }
         self._automaton = self._make_automaton()
+
+        self.count_prematcher_false_positives = count_prematcher_false_positives
+        if count_prematcher_false_positives:
+            self.prematcher_success_rates = {
+                pattern: SuccessCounter() for pattern, _ in self.patterns
+            }
 
     @classmethod
     def generate_prematchers(cls, pattern: Pattern) -> Set[str]:
@@ -156,31 +178,20 @@ class RegexMatcher:
         if enable_prematchers:
             candidates_set = self.get_pattern_candidates(s)
             candidates = [p for p in candidates if p in candidates_set]
+
         # Inlined versions for match_func = re.match/search, up to 30% faster.
         if match_func is re.match:
-            return [
-                (pattern, match)
-                for pattern, match in [
-                    (pattern, pattern.match(s)) for pattern in candidates
-                ]
-                if match is not None
-            ]
+            re_results = [(pattern, pattern.match(s)) for pattern in candidates]
         elif match_func is re.search:
-            return [
-                (pattern, match)
-                for pattern, match in [
-                    (pattern, pattern.search(s)) for pattern in candidates
-                ]
-                if match is not None
-            ]
+            re_results = [(pattern, pattern.search(s)) for pattern in candidates]
         else:
-            return [
-                (pattern, match)
-                for pattern, match in [
-                    (pattern, match_func(pattern, s)) for pattern in candidates
-                ]
-                if match is not None
-            ]
+            re_results = [(pattern, match_func(pattern, s)) for pattern in candidates]
+        if self.count_prematcher_false_positives:
+            for pattern, match in re_results:
+                self.prematcher_success_rates[pattern].record_attempt(
+                    successful=match is not None
+                )
+        return [(pattern, match) for pattern, match in re_results if match is not None]
 
     """Alias for ``run(re.match, ...)``."""
     match = functools.partialmethod(run, re.match)
@@ -194,6 +205,28 @@ class RegexMatcher:
         return self._patterns_always_candidates.union(
             *(candidates for _, candidates in self._automaton.iter(s))
         )
+
+    def get_prematcher_false_positives(self) -> List[Tuple[Pattern, SuccessCounter]]:
+        return sorted(
+            (
+                (pattern, success_counter)
+                for pattern, success_counter in self.prematcher_success_rates.items()
+                if success_counter.attempts
+            ),
+            key=lambda x: x[1].compute_success_rate(),
+        )
+
+    def print_prematcher_false_positives(self, worst_n: Optional[int] = None) -> None:
+        print("FP count | FP rate | Pattern")
+        print("---------+---------+--------")
+        for pattern, success_counter in self.get_prematcher_false_positives()[:worst_n]:
+            print(
+                "{:>8d} |    {:.2f} | {}".format(
+                    success_counter.attempts - success_counter.successful_attempts,
+                    1 - success_counter.compute_success_rate(),
+                    pattern.pattern,
+                )
+            )
 
 
 def _isascii(s: str) -> bool:
