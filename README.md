@@ -83,3 +83,22 @@ without first running any prematchers), pass an empty list of prematchers:
 ```py
 multiregex.RegexMatcher([(r"super complicated regex", [])])
 ```
+
+### Profiling prematchers
+
+To check if your prematchers are effective, you can use the built-in prematcher "profiler":
+
+```py
+yyyy_mm_dd = r"(19|20)\d\d-\d\d-\d\d"  # Default prematchers: {'-'}
+matcher = multiregex.RegexMatcher([yyyy_mm_dd], count_prematcher_false_positives=True)
+for string in my_benchmark_dataset:
+    matcher.search(string)
+print(matcher.format_prematcher_false_positives())
+# => For example:
+# FP count | FP rate | Pattern / Prematchers
+# ---------+---------+----------------------
+#      137 |    0.72 | (19|20)\d\d-\d\d-\d\d / {'-'}
+```
+
+In this example, there were 137 input strings that were matched positive by the prematcher but negative by the regex.
+In other words, the prematcher failed to prevent slow regex evaluation in 72% of the cases.
