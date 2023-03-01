@@ -3,7 +3,7 @@ import re
 
 import pytest
 
-from multiregex import RegexMatcher, generate_prematcher
+from multiregex import AhocorasickError, RegexMatcher, generate_prematchers
 from test_utils import assert_matches_equal
 
 
@@ -59,9 +59,9 @@ def test_ordered():
         ("(aa|(bb|cc))", None),
     ],
 )
-def test_generate_prematcher(pattern, prematcher):
+def test_generate_prematchers(pattern, prematcher):
     try:
-        assert generate_prematcher(re.compile(pattern)) == prematcher
+        assert generate_prematchers(re.compile(pattern)) == prematcher
     except ValueError:
         assert prematcher is None
 
@@ -74,5 +74,17 @@ def test_generate_prematcher(pattern, prematcher):
     ],
 )
 def test_invalid_prematchers(prematchers):
-    with pytest.raises((TypeError, ValueError)):
+    with pytest.raises((AhocorasickError, TypeError, ValueError)):
         RegexMatcher([(re.compile(""), prematchers)])
+
+
+def test_false_positives_counter():
+    matcher = RegexMatcher(["(a|a)a", "aa"], count_prematcher_false_positives=True)
+    assert "(No data)" in matcher.format_prematcher_false_positives()
+    matcher.match("a")
+    matcher.match("aa")
+    matcher.match("baa")
+    # (a|a)a -> {"a"} prematches all 3 calls but matches only "aa".
+    assert "0.67" in matcher.format_prematcher_false_positives()
+    # aa -> {"aa"} doesn't prematch "a".
+    assert "0.50" in matcher.format_prematcher_false_positives()
