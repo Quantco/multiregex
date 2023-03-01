@@ -22,12 +22,14 @@ def test_basics():
     )
 
 
-def test_match_method():
+def test_search_match_fullmatch():
     test_re = re.compile("b")
     matcher = RegexMatcher([test_re])
     assert matcher.search("abc")
     assert not matcher.match("abc")
     assert matcher.match("b")
+    assert not matcher.fullmatch("bb")
+    assert matcher.fullmatch("b")
 
 
 def test_ordered():

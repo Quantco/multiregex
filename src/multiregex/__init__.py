@@ -179,10 +179,12 @@ class RegexMatcher:
             candidates = [p for p in candidates if p in candidates_set]
 
         # Inlined versions for match_func = re.match/search, up to 30% faster.
-        if match_func is re.match:
-            re_results = [(pattern, pattern.match(s)) for pattern in candidates]
-        elif match_func is re.search:
+        if match_func is re.search:
             re_results = [(pattern, pattern.search(s)) for pattern in candidates]
+        elif match_func is re.match:
+            re_results = [(pattern, pattern.match(s)) for pattern in candidates]
+        elif match_func is re.fullmatch:
+            re_results = [(pattern, pattern.fullmatch(s)) for pattern in candidates]
         else:
             re_results = [(pattern, match_func(pattern, s)) for pattern in candidates]
         if self.count_prematcher_false_positives:
@@ -192,11 +194,14 @@ class RegexMatcher:
                 )
         return [(pattern, match) for pattern, match in re_results if match is not None]
 
+    """Alias for ``run(re.search, ...)``."""
+    search = functools.partialmethod(run, re.search)
+
     """Alias for ``run(re.match, ...)``."""
     match = functools.partialmethod(run, re.match)
 
-    """Alias for ``run(re.search, ...)``."""
-    search = functools.partialmethod(run, re.search)
+    """Alias for ``run(re.fullmatch, ...)``."""
+    fullmatch = functools.partialmethod(run, re.fullmatch)
 
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
