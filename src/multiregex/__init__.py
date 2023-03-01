@@ -8,8 +8,8 @@ unless it's impossible for the corresponding regex to match, similar to Bloom fi
 Examples:
     r"\bfoo\b"          -> ["foo"]
     r"(foo|bar) \s*"    -> ["foo ", "bar "]
-    r"Gemäß Richtlinie" -> ["gem richtlinie"]
-    # Prematchers are all-lowercase and non-ASCII characters are ignored
+    r"Gemäß Richtlinie" -> ["gemäß richtlinie"]
+    # Prematchers are all-lowercase (to support re.IGNORECASE).
 
 Prematchers are attempted to be automatically generated from the regexes, see
 `RegexMatcher.generate_prematchers`.  You must provide a handcrafted list of
@@ -200,9 +200,9 @@ class RegexMatcher:
 
     def get_pattern_candidates(self, s: str) -> Set[Pattern]:
         """Get a set of patterns that potentially match `s`."""
-        s = to_lowercase_ascii(s)
+        matches = self.automaton.iter(s.lower())
         return self.patterns_without_prematchers.union(
-            *(candidates for _, candidates in self.automaton.iter(s))
+            *(candidates for _, candidates in matches)
         )
 
     def get_prematcher_false_positives(
@@ -240,18 +240,6 @@ class RegexMatcher:
         return "\n".join(output)
 
 
-def _isascii(s: str) -> bool:
-    try:
-        return s.isascii()
-    except AttributeError:
-        # Python < 3.7
-        return not any(ord(c) & 0x80 for c in s)
-
-
-def to_lowercase_ascii(s: str) -> str:
-    return s.lower().encode("ascii", errors="ignore").decode()
-
-
 def validate_prematcher(prematcher: str) -> None:
     if not prematcher or any(map(str.isupper, prematcher)):
         raise ValueError(
@@ -270,9 +258,7 @@ def generate_prematchers(pattern: Pattern) -> Prematchers:
     """
 
     def _get_top_level_prematcher(sre_ast):
-        return max(
-            map(to_lowercase_ascii, _sre_find_terminals(sre_ast)), key=len, default=""
-        )
+        return max(_sre_find_terminals(sre_ast), key=len, default="").lower()
 
     sre_ast = _simplify_sre_ast(sre_parse.parse(pattern.pattern))
 
