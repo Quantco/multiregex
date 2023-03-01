@@ -40,6 +40,8 @@ matcher.search("john.doe@example.com")
 
 # Same as above, but with `re.match`.
 matcher.match(...)
+# Same as above, but with `re.fullmatch`.
+matcher.fullmatch(...)
 ```
 
 ### Custom prematchers
