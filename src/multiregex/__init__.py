@@ -20,8 +20,13 @@ automatically generated prematchers.
 import collections
 import functools
 import re
-import sre_constants
-import sre_parse
+
+try:
+    sre_constants = re._constants  # type: ignore
+    sre_parse = re._parser  # type: ignore
+except AttributeError:
+    import sre_constants
+    import sre_parse
 from typing import (
     Dict,
     Iterable,
