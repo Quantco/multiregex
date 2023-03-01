@@ -22,6 +22,11 @@ def test_basics():
     )
 
 
+def test_unicode():
+    matcher = RegexMatcher(["ä"])
+    assert matcher.search("ä")
+
+
 def test_search_match_fullmatch():
     test_re = re.compile("b")
     matcher = RegexMatcher([test_re])
@@ -70,6 +75,7 @@ def test_generate_prematchers(pattern, prematcher):
     "prematchers",
     [
         [""],
+        ["UPPER"],
         "abc",
     ],
 )

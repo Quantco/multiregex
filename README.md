@@ -50,7 +50,8 @@ To be able to quickly match many regexes against a string, `multiregex` uses
 "prematchers" under the hood. Prematchers are lists of non-regex strings of which
 at least one can be assumed to be present in the haystack if the corresponding regex matches.
 As an example, a valid prematcher of `r"\w+\.com"` could be `[".com"]` and a valid
-prematcher of `r"(B|b)anana"` could be `["B", "b"]` or `["anana"]`.
+prematcher of `r"(B|b)aNäNa"` could be `["b"]` or `["anäna"]`.
+Note that all prematchers must all-lowercase (in order for ``multiregex`` to be able to support ``re.IGNORECASE``).
 
 You will likely have to provide your own prematchers for all but the simplest
 regex patterns:
@@ -70,9 +71,9 @@ To use a mixture of automatic and custom prematchers, pass `prematchers=None`:
 
 ```py
 matcher = multiregex.RegexMatcher([(r"\d+", map(str, range(10))), (r"\w+\.com", None)])
-matcher.patterns
-# => [(re.compile('\\d+'), ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']),
-#     (re.compile('\\w+\\.com'), ['com'])]
+matcher.prematchers
+# => {(re.compile('\\d+'), {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}),
+#     (re.compile('\\w+\\.com'), {'com'})}
 ```
 
 ### Disabling prematchers
