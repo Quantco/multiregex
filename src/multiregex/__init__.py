@@ -152,7 +152,9 @@ class RegexMatcher:
         for pattern_idx, (pattern, prematchers) in enumerate(patterns):
             for prematcher in prematchers:
                 # `pattern_idx` is used for keeping patterns in order, see `get_pattern_candidates`.
-                pattern_candidates_by_prematchers[prematcher].add((pattern_idx, pattern))
+                pattern_candidates_by_prematchers[prematcher].add(
+                    (pattern_idx, pattern)
+                )
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
     def run(self, match_func, s, enable_prematchers=True):
