@@ -146,12 +146,13 @@ class RegexMatcher:
         return patterns
 
     @staticmethod
-    def _make_automaton(prematchers):
+    def _make_automaton(patterns):
         """Create the pyahocorasick automaton."""
         pattern_candidates_by_prematchers = collections.defaultdict(set)
-        for pattern, prematchers_ in prematchers:
-            for prematcher in prematchers_:
-                pattern_candidates_by_prematchers[prematcher].add(pattern)
+        for pattern_idx, (pattern, prematchers) in enumerate(patterns):
+            for prematcher in prematchers:
+                # `pattern_idx` is used for keeping patterns in order, see `get_pattern_candidates`.
+                pattern_candidates_by_prematchers[prematcher].add((pattern_idx, pattern))
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
     def run(self, match_func, s, enable_prematchers=True):
@@ -166,10 +167,10 @@ class RegexMatcher:
         enable_prematchers : bool (default True)
             If false, do not use prematchers; use `match_func` only.
         """
-        candidates = self.patterns
         if enable_prematchers:
-            candidates_set = self.get_pattern_candidates(s)
-            candidates = [p for p in candidates if p in candidates_set]
+            candidates = self.get_pattern_candidates(s)
+        else:
+            candidates = self.patterns
 
         # Inlined versions for match_func = re.match/search, up to 30% faster.
         if match_func is re.search:
@@ -198,12 +199,18 @@ class RegexMatcher:
     """Alias for ``run(re.fullmatch, ...)``."""
     fullmatch = functools.partialmethod(run, re.fullmatch)
 
-    def get_pattern_candidates(self, s: str) -> Set[Pattern]:
-        """Get a set of patterns that potentially match `s`."""
+    def get_pattern_candidates(self, s: str) -> List[Pattern]:
+        """Get a list of patterns that potentially match `s`.
+
+        Pattern order is the same the order of `patterns` given to `__init__`.
+        """
         matches = self.automaton.iter(s.lower())
-        return self.patterns_without_prematchers.union(
+        unordered_candidates = self.patterns_without_prematchers.union(
             *(candidates for _, candidates in matches)
         )
+        # Sort by `pattern_idx`, see `_make_automaton`.
+        ordered_candidates = sorted(unordered_candidates, key=lambda x: x[0])
+        return [pattern for _, pattern in ordered_candidates]
 
     def get_prematcher_false_positives(
         self,
