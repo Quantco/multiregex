@@ -41,12 +41,8 @@ from typing import (
 )
 
 import ahocorasick
-import pkg_resources
 
-try:
-    __version__ = pkg_resources.get_distribution(__name__).version
-except Exception:
-    __version__ = "unknown"
+__version__ = "1.0.0"
 
 
 V = TypeVar("V")

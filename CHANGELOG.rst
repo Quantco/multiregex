@@ -18,7 +18,7 @@ Other changes:
 - Add a prematcher profiler.
 - Up to 2x speedup in ``.search/.match/.fullmatch``.
 
-1.0.0 (2022-MM-DD)
+1.0.0 (2022-05-16)
 ------------------
 
 Initial release.
