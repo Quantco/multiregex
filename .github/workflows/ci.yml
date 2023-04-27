@@ -30,7 +30,7 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
         run: git fetch --prune --unshallow
-      - name: Set up Conda env
+      - name: Set up Micromamba env
         uses: mamba-org/setup-micromamba@f0ef657642d0da8033efd9cdc514001dbb8e40e7
         with:
           environment-file: environment.yml
