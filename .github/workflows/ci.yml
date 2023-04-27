@@ -31,9 +31,10 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@e2b397b12d0a38069451664382b769c9456e3d6d
+        uses: mamba-org/setup-micromamba@f0ef657642d0da8033efd9cdc514001dbb8e40e7
         with:
-          extra-specs: |
+          environment-file: environment.yml
+          create-args: >-
             python=${{ matrix.python-version }}
         if: matrix.python-version != '3.4'
       - name: "Install Python 3.4"
