@@ -18,7 +18,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { python-version: "3.4", os: ubuntu-18.04 }
           - { python-version: "3.6", os: windows-2019 }
           - { python-version: "3.8", os: windows-latest }
           - { python-version: "3.10", os: ubuntu-latest }
@@ -30,25 +29,15 @@ jobs:
           ref: ${{ github.head_ref }}
       - name: Fetch full git history
         run: git fetch --prune --unshallow
-      - name: Set up Conda env
-        uses: mamba-org/provision-with-micromamba@e2b397b12d0a38069451664382b769c9456e3d6d
+      - name: Set up Micromamba env
+        uses: mamba-org/setup-micromamba@f0ef657642d0da8033efd9cdc514001dbb8e40e7
         with:
-          extra-specs: |
+          environment-file: environment.yml
+          create-args: >-
             python=${{ matrix.python-version }}
-        if: matrix.python-version != '3.4'
-      - name: "Install Python 3.4"
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.4
-        if: matrix.python-version == '3.4'
       - name: Run tests
         run: |
-          if [ ${{ matrix.python-version }} = 3.4 ]; then
-            pip install pytest pyahocorasick
-            export PYTHONPATH=src
-          else
-            pip install -e .
-          fi
+          pip install -e .
           pytest -v tests/
 
   pre-commit-checks:
