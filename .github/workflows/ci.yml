@@ -30,7 +30,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Micromamba env
-        uses: mamba-org/setup-micromamba@f0ef657642d0da8033efd9cdc514001dbb8e40e7
+        uses: mamba-org/setup-micromamba@5d5dbebd87f7b9358c403c7a66651fa92b310105
         with:
           environment-file: environment.yml
           create-args: >-
