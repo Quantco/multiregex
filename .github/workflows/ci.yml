@@ -17,11 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - { python-version: "3.6", os: windows-2019 }
-          - { python-version: "3.8", os: windows-latest }
-          - { python-version: "3.10", os: ubuntu-latest }
-          - { python-version: "3.11", os: ubuntu-latest }
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
+        os: ['ubuntu-latest', 'windows-latest', 'macos-latest']
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
@@ -30,7 +27,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Micromamba env
-        uses: mamba-org/setup-micromamba@f0ef657642d0da8033efd9cdc514001dbb8e40e7
+        uses: mamba-org/setup-micromamba@5d5dbebd87f7b9358c403c7a66651fa92b310105
         with:
           environment-file: environment.yml
           create-args: >-
