@@ -42,7 +42,7 @@ from typing import (
 
 import ahocorasick
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 
 V = TypeVar("V")
