@@ -7,7 +7,7 @@
 Changelog
 =========
 
-2.0.1 (2023-XX-XX)
+2.0.1 (2023-06-11)
 ------------------
 
 - Fix exception when mixing patterns with prematchers and without prematchers.
