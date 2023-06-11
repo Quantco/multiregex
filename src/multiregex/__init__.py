@@ -83,10 +83,13 @@ class RegexMatcher:
         patterns = self._generate_missing_prematchers(patterns)
         self.patterns = [pattern for pattern, _ in patterns]
         self.prematchers = dict(patterns)
+        enumerated_patterns = list(enumerate(patterns))
         self.patterns_without_prematchers = {
-            pattern for pattern, prematchers in patterns if not prematchers
+            (idx, pattern)
+            for idx, (pattern, prematchers) in enumerated_patterns
+            if not prematchers
         }
-        self.automaton = self._make_automaton(patterns)
+        self.automaton = self._make_automaton(enumerated_patterns)
 
         self.count_prematcher_false_positives = count_prematcher_false_positives
         if count_prematcher_false_positives:
@@ -142,10 +145,10 @@ class RegexMatcher:
         return patterns
 
     @staticmethod
-    def _make_automaton(patterns):
+    def _make_automaton(enumerated_patterns):
         """Create the pyahocorasick automaton."""
         pattern_candidates_by_prematchers = collections.defaultdict(set)
-        for pattern_idx, (pattern, prematchers) in enumerate(patterns):
+        for pattern_idx, (pattern, prematchers) in enumerated_patterns:
             for prematcher in prematchers:
                 # `pattern_idx` is used for keeping patterns in order, see `get_pattern_candidates`.
                 pattern_candidates_by_prematchers[prematcher].add(
