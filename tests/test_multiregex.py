@@ -38,11 +38,13 @@ def test_search_match_fullmatch():
 
 
 def test_ordered():
-    patterns = [re.compile(c) for c in "abcdef"]
+    patterns = [
+        (re.compile(c), None if i % 2 == 0 else []) for i, c in enumerate("abcdef")
+    ]  # type: ignore
     random.shuffle(patterns)
     matcher = RegexMatcher(patterns)
-    matches = matcher.search("abcdef")
-    assert [p for p, _ in matches] == patterns
+    matches = matcher.search("abcdefg")
+    assert [p for p, _ in matches] == [p for p, _ in patterns]
 
 
 @pytest.mark.parametrize(
