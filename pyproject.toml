@@ -56,4 +56,4 @@ allow_redefinition = true
 
 [tool.pytest.ini_options]
 # This will be pytest's future default.
-addopts = "--import-mode=importlib"
+addopts = "--import-mode=importlib --color=yes"
