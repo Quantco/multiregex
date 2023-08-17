@@ -5,6 +5,10 @@ on:
       - main
   pull_request:
 
+defaults:
+  run:
+    shell: bash -el {0}
+
 jobs:
   tests:
     name: Tests - Python ${{ matrix.python-version }} - ${{ matrix.os }}
@@ -30,9 +34,8 @@ jobs:
             python=${{ matrix.python-version }}
             pytest-emoji
             pytest-md
-      # - name: pip install
-      #   run: pip install -e .
-      #   shell: micromamba-shell {0}
+      - name: pip install
+        run: pip install -e .
       - name: Run pytest
         uses: pavelzw/pytest-action@v2
         with:
