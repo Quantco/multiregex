@@ -33,6 +33,7 @@ jobs:
         shell: micromamba-shell {0}
       - name: Run pytest
         uses: pavelzw/pytest-action@v2
+        custom-arguments: --color=yes
 
   pre-commit-checks:
     name: pre-commit checks
