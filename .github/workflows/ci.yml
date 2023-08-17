@@ -5,10 +5,6 @@ on:
       - main
   pull_request:
 
-defaults:
-  run:
-    shell: bash -el {0}
-
 jobs:
   tests:
     name: Tests - Python ${{ matrix.python-version }} - ${{ matrix.os }}
@@ -33,9 +29,10 @@ jobs:
           create-args: >-
             python=${{ matrix.python-version }}
       - name: Run tests
-        run: |
-          pip install -e .
-          pytest --color -v tests/
+        run: pip install -e .
+        shell: micromamba-shell {0}
+      - name: Run pytest
+        uses: pavelzw/pytest-action@v2
 
   pre-commit-checks:
     name: pre-commit checks
