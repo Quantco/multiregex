@@ -28,6 +28,7 @@ jobs:
           environment-file: environment.yml
           create-args: >-
             python=${{ matrix.python-version }}
+            pytest-emoji
             pytest-md
       - name: Run tests
         run: pip install -e .
