@@ -38,8 +38,6 @@ jobs:
         run: pip install -e .
       - name: Run pytest
         uses: pavelzw/pytest-action@v2
-        with:
-          custom-arguments: --color=yes
 
   pre-commit-checks:
     name: pre-commit checks
