@@ -1,8 +1,31 @@
 [build-system]
-requires = ['setuptools', 'setuptools-scm', 'wheel']
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
 
-[tool.setuptools_scm]
-version_scheme = "post-release"
+[project]
+name = "multiregex"
+authors = [{name="QuantCo, Inc.", email="noreply@quantco.com"}]
+
+maintainers = [{name = "Jonas Haag", email = "jonas.haag@quantco.com"}]
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11"
+]
+
+readme = "README.md"
+dynamic = ["version", "description"]
+
+[project.urls]
+Home = "https://github.com/quantco/multiregex"
+
+[tool.flit.sdist]
+exclude = [".gitignore"]
 
 [tool.black]
 exclude = '''
@@ -29,6 +52,7 @@ python_version = 3.8
 ignore_missing_imports = true
 no_implicit_optional = true
 check_untyped_defs = true
+allow_redefinition = true
 
 [tool.pytest.ini_options]
 # This will be pytest's future default.

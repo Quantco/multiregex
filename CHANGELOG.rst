@@ -7,7 +7,23 @@
 Changelog
 =========
 
-1.0.0 (2022-MM-DD)
+2.0.1 (2023-06-11)
+------------------
+
+- Fix exception when mixing patterns with prematchers and without prematchers.
+
+2.0.0 (2023-03-08)
+------------------
+
+**Breaking change:** Prematchers now support non-ASCII characters. This will render all custom prematchers potentially invalid. **Please update your custom prematchers.**
+
+Other changes:
+
+- Add support for `.fullmatch`.
+- Add a prematcher profiler.
+- Up to 2x speedup in ``.search/.match/.fullmatch``.
+
+1.0.0 (2022-05-16)
 ------------------
 
 Initial release.

@@ -3,7 +3,7 @@ import re
 
 import pytest
 
-from multiregex import RegexMatcher, generate_prematcher
+from multiregex import AhocorasickError, RegexMatcher, generate_prematchers
 from test_utils import assert_matches_equal
 
 
@@ -22,20 +22,29 @@ def test_basics():
     )
 
 
-def test_match_method():
+def test_unicode():
+    matcher = RegexMatcher(["ä"])
+    assert matcher.search("ä")
+
+
+def test_search_match_fullmatch():
     test_re = re.compile("b")
     matcher = RegexMatcher([test_re])
     assert matcher.search("abc")
     assert not matcher.match("abc")
     assert matcher.match("b")
+    assert not matcher.fullmatch("bb")
+    assert matcher.fullmatch("b")
 
 
 def test_ordered():
-    patterns = [re.compile(c) for c in "abcdef"]
+    patterns = [
+        (re.compile(c), None if i % 2 == 0 else []) for i, c in enumerate("abcdef")
+    ]  # type: ignore
     random.shuffle(patterns)
     matcher = RegexMatcher(patterns)
-    matches = matcher.search("abcdef")
-    assert [p for p, _ in matches] == patterns
+    matches = matcher.search("abcdefg")
+    assert [p for p, _ in matches] == [p for p, _ in patterns]
 
 
 @pytest.mark.parametrize(
@@ -57,9 +66,9 @@ def test_ordered():
         ("(aa|(bb|cc))", None),
     ],
 )
-def test_generate_prematcher(pattern, prematcher):
+def test_generate_prematchers(pattern, prematcher):
     try:
-        assert generate_prematcher(re.compile(pattern)) == prematcher
+        assert generate_prematchers(re.compile(pattern)) == prematcher
     except ValueError:
         assert prematcher is None
 
@@ -68,9 +77,22 @@ def test_generate_prematcher(pattern, prematcher):
     "prematchers",
     [
         [""],
+        ["UPPER"],
         "abc",
     ],
 )
 def test_invalid_prematchers(prematchers):
-    with pytest.raises((TypeError, ValueError)):
+    with pytest.raises((AhocorasickError, TypeError, ValueError)):
         RegexMatcher([(re.compile(""), prematchers)])
+
+
+def test_false_positives_counter():
+    matcher = RegexMatcher(["(a|a)a", "aa"], count_prematcher_false_positives=True)
+    assert "(No data)" in matcher.format_prematcher_false_positives()
+    matcher.match("a")
+    matcher.match("aa")
+    matcher.match("baa")
+    # (a|a)a -> {"a"} prematches all 3 calls but matches only "aa".
+    assert "0.67" in matcher.format_prematcher_false_positives()
+    # aa -> {"aa"} doesn't prematch "a".
+    assert "0.50" in matcher.format_prematcher_false_positives()

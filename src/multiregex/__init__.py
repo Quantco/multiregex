@@ -8,8 +8,8 @@ unless it's impossible for the corresponding regex to match, similar to Bloom fi
 Examples:
     r"\bfoo\b"          -> ["foo"]
     r"(foo|bar) \s*"    -> ["foo ", "bar "]
-    r"Gemäß Richtlinie" -> ["gem richtlinie"]
-    # Prematchers are all-lowercase and non-ASCII characters are ignored
+    r"Gemäß Richtlinie" -> ["gemäß richtlinie"]
+    # Prematchers are all-lowercase (to support re.IGNORECASE).
 
 Prematchers are attempted to be automatically generated from the regexes, see
 `RegexMatcher.generate_prematchers`.  You must provide a handcrafted list of
@@ -20,8 +20,13 @@ automatically generated prematchers.
 import collections
 import functools
 import re
-import sre_constants
-import sre_parse
+
+try:
+    sre_constants = re._constants  # type: ignore
+    sre_parse = re._parser  # type: ignore
+except AttributeError:
+    import sre_constants
+    import sre_parse
 from typing import (
     Dict,
     Iterable,
@@ -36,16 +41,18 @@ from typing import (
 )
 
 import ahocorasick
-import pkg_resources
 
-try:
-    __version__ = pkg_resources.get_distribution(__name__).version
-except Exception:
-    __version__ = "unknown"
+__version__ = "2.0.0"
 
 
 V = TypeVar("V")
 PatternOrStr = Union[Pattern, str]
+Prematchers = Set[str]
+FalsePositivesCounter = Dict[str, int]
+
+
+class AhocorasickError(Exception):
+    pass
 
 
 class RegexMatcher:
@@ -54,6 +61,7 @@ class RegexMatcher:
         patterns: Iterable[
             Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
+        count_prematcher_false_positives=False,
     ):
         """
         Parameters
@@ -66,43 +74,37 @@ class RegexMatcher:
             prematchers using `generate_prematchers`. To disable prematchers for
             a specific pattern (ie., always run the "slow" matcher without any
             prematching), use a `(pattern, []`) tuple.
+        count_prematcher_false_positives : bool, default: False
+            If true, enable "profiling" to check the effectiveness of prematchers on
+            the input strings given to ``search``, ``match``, and ``fullmatch``.
+            Use ``format_prematcher_false_positives`` to retrieve the profile.
         """
         patterns = self._normalize_patterns(patterns)
-        prematchers_lists = [
-            prematchers
-            if prematchers is not None
-            else self.generate_prematchers(pattern)
-            for pattern, prematchers in patterns
-        ]
-        for prematchers in prematchers_lists:
-            for prematcher in prematchers:
-                self.validate_prematcher(prematcher)
-        self.patterns = [
-            (pattern, prematchers)
-            for (pattern, _), prematchers in zip(patterns, prematchers_lists)
-        ]
-        self._automaton = self._make_automaton()
+        patterns = self._generate_missing_prematchers(patterns)
+        self.patterns = [pattern for pattern, _ in patterns]
+        self.prematchers = dict(patterns)
+        enumerated_patterns = list(enumerate(patterns))
+        self.patterns_without_prematchers = {
+            (idx, pattern)
+            for idx, (pattern, prematchers) in enumerated_patterns
+            if not prematchers
+        }
+        self.automaton = self._make_automaton(enumerated_patterns)
+
+        self.count_prematcher_false_positives = count_prematcher_false_positives
+        if count_prematcher_false_positives:
+            self.prematcher_false_positives = {
+                pattern: {"positives": 0, "false_positives": 0}
+                for pattern in self.patterns
+            }
 
     @classmethod
-    def generate_prematchers(cls, pattern: Pattern) -> Set[str]:
+    def generate_prematchers(cls, pattern: Pattern) -> Prematchers:
         """Generate prematchers for the given pattern."""
-        return generate_prematcher(pattern)
+        return generate_prematchers(pattern)
 
     @staticmethod
-    def validate_prematcher(prematcher):
-        if (
-            not prematcher
-            or not _isascii(prematcher)
-            or any(map(str.isupper, prematcher))
-        ):
-            raise ValueError(
-                "Prematcher {!r} must be non-empty, all-lowercase, all-ASCII".format(
-                    prematcher
-                )
-            )
-
-    @staticmethod
-    def _normalize_patterns(patterns) -> List[Tuple[Pattern, Optional[Set[str]]]]:
+    def _normalize_patterns(patterns):
         """Normalize `patterns` param given to `__init__`."""
 
         def safe_set(iterable):
@@ -127,12 +129,31 @@ class RegexMatcher:
                 for pattern, prematchers in patterns
             ]
 
-    def _make_automaton(self):
+    def _generate_missing_prematchers(self, patterns):
+        patterns = [
+            (
+                pattern,
+                self.generate_prematchers(pattern)
+                if prematchers is None
+                else prematchers,
+            )
+            for pattern, prematchers in patterns
+        ]
+        for _, prematchers in patterns:
+            for prematcher in prematchers:
+                validate_prematcher(prematcher)
+        return patterns
+
+    @staticmethod
+    def _make_automaton(enumerated_patterns):
         """Create the pyahocorasick automaton."""
         pattern_candidates_by_prematchers = collections.defaultdict(set)
-        for pattern, prematchers in self.patterns:
+        for pattern_idx, (pattern, prematchers) in enumerated_patterns:
             for prematcher in prematchers:
-                pattern_candidates_by_prematchers[prematcher].add(pattern)
+                # `pattern_idx` is used for keeping patterns in order, see `get_pattern_candidates`.
+                pattern_candidates_by_prematchers[prematcher].add(
+                    (pattern_idx, pattern)
+                )
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
     def run(self, match_func, s, enable_prematchers=True):
@@ -147,45 +168,97 @@ class RegexMatcher:
         enable_prematchers : bool (default True)
             If false, do not use prematchers; use `match_func` only.
         """
-        candidates = [pattern for pattern, _ in self.patterns]
         if enable_prematchers:
-            candidates_set = self.get_pattern_candidates(s)
-            candidates = [p for p in candidates if p in candidates_set]
-        match_func = functools.partial(match_func, string=s)
-        return [
-            (pattern, match)
-            for pattern, match in zip(candidates, map(match_func, candidates))
-            if match is not None
-        ]
+            candidates = self.get_pattern_candidates(s)
+        else:
+            candidates = self.patterns
 
-    """Alias for ``run(re.match, ...)``."""
-    match = functools.partialmethod(run, re.match)
+        # Inlined versions for match_func = re.match/search, up to 30% faster.
+        if match_func is re.search:
+            re_results = [(pattern, pattern.search(s)) for pattern in candidates]
+        elif match_func is re.match:
+            re_results = [(pattern, pattern.match(s)) for pattern in candidates]
+        elif match_func is re.fullmatch:
+            re_results = [(pattern, pattern.fullmatch(s)) for pattern in candidates]
+        else:
+            re_results = [(pattern, match_func(pattern, s)) for pattern in candidates]
+
+        if self.count_prematcher_false_positives:
+            for pattern, match in re_results:
+                self.prematcher_false_positives[pattern]["positives"] += 1
+                if match is None:
+                    self.prematcher_false_positives[pattern]["false_positives"] += 1
+
+        return [(pattern, match) for pattern, match in re_results if match is not None]
 
     """Alias for ``run(re.search, ...)``."""
     search = functools.partialmethod(run, re.search)
 
-    def get_pattern_candidates(self, s: str) -> Set[Pattern]:
-        """Get a set of patterns that potentially match `s`."""
-        s = to_lowercase_ascii(s)
-        return set.union(
-            set(), *(candidates for _, candidates in self._automaton.iter(s))
-        ) | {pattern for pattern, prematchers in self.patterns if not prematchers}
+    """Alias for ``run(re.match, ...)``."""
+    match = functools.partialmethod(run, re.match)
+
+    """Alias for ``run(re.fullmatch, ...)``."""
+    fullmatch = functools.partialmethod(run, re.fullmatch)
+
+    def get_pattern_candidates(self, s: str) -> List[Pattern]:
+        """Get a list of patterns that potentially match `s`.
+
+        Pattern order is the same the order of `patterns` given to `__init__`.
+        """
+        matches = self.automaton.iter(s.lower())
+        unordered_candidates = self.patterns_without_prematchers.union(
+            *(candidates for _, candidates in matches)
+        )
+        # Sort by `pattern_idx`, see `_make_automaton`.
+        ordered_candidates = sorted(unordered_candidates, key=lambda x: x[0])
+        return [pattern for _, pattern in ordered_candidates]
+
+    def get_prematcher_false_positives(
+        self,
+    ) -> List[Tuple[Pattern, FalsePositivesCounter]]:
+        if not self.count_prematcher_false_positives:
+            raise RuntimeError("Prematcher profiling not enabled")
+        return sorted(
+            (
+                (pattern, fp_counter)
+                for pattern, fp_counter in self.prematcher_false_positives.items()
+                if fp_counter["false_positives"]
+            ),
+            key=lambda x: -x[1]["false_positives"],
+        )
+
+    def format_prematcher_false_positives(self, worst_n: Optional[int] = None) -> str:
+        output = [
+            "FP count | FP rate | Pattern / Prematchers",
+            "---------+---------+----------------------",
+        ]
+        fp_data = self.get_prematcher_false_positives()[:worst_n]
+        if fp_data:
+            for pattern, fp_counter in fp_data:
+                output.append(
+                    "{:>8d} |    {:.2f} | {} / {}".format(
+                        fp_counter["false_positives"],
+                        fp_counter["false_positives"] / fp_counter["positives"],
+                        pattern.pattern,
+                        self.prematchers[pattern],
+                    )
+                )
+        else:
+            output.append("(No data)")
+        return "\n".join(output)
 
 
-def _isascii(s: str) -> bool:
-    try:
-        return s.isascii()
-    except AttributeError:
-        # Python < 3.7
-        return not any(ord(c) & 0x80 for c in s)
+def validate_prematcher(prematcher: str) -> None:
+    if not prematcher or any(map(str.isupper, prematcher)):
+        raise ValueError(
+            "Prematcher {!r} must be non-empty, all-lowercase, all-ASCII".format(
+                prematcher
+            )
+        )
 
 
-def to_lowercase_ascii(s: str) -> str:
-    return s.lower().encode("ascii", errors="ignore").decode()
-
-
-def generate_prematcher(pattern: Pattern) -> Set[str]:
-    """Generate a fallback/default prematchers for the given regex `pattern`.
+def generate_prematchers(pattern: Pattern) -> Prematchers:
+    """Generate fallback/default prematchers for the given regex `pattern`.
 
     Currently the fallback prematcher is just the set of longest terminal texts
     in the pattern, eg. "Fast(er)? regex(es| matching)" -> {" regex"}. One level of
@@ -193,9 +266,7 @@ def generate_prematcher(pattern: Pattern) -> Set[str]:
     """
 
     def _get_top_level_prematcher(sre_ast):
-        return max(
-            map(to_lowercase_ascii, _sre_find_terminals(sre_ast)), key=len, default=""
-        )
+        return max(_sre_find_terminals(sre_ast), key=len, default="").lower()
 
     sre_ast = _simplify_sre_ast(sre_parse.parse(pattern.pattern))
 
@@ -258,4 +329,4 @@ def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V
 def _ahocorasick_ensure_successful(res):
     """pyahocorasick returns errors as bools."""
     if res is False:
-        raise RuntimeError("Error performing ahocorasick call")
+        raise AhocorasickError("Error performing ahocorasick call")
