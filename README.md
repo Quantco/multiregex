@@ -8,6 +8,10 @@
 
 Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching.
 
+## Introduction
+
+See [this introductory blog post](https://tech.quantco.com/2022/07/31/multiregex.html).
+
 ## Installation
 
 You can install the package in development mode using:
