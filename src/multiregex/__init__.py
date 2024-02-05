@@ -133,9 +133,11 @@ class RegexMatcher:
         patterns = [
             (
                 pattern,
-                self.generate_prematchers(pattern)
-                if prematchers is None
-                else prematchers,
+                (
+                    self.generate_prematchers(pattern)
+                    if prematchers is None
+                    else prematchers
+                ),
             )
             for pattern, prematchers in patterns
         ]
