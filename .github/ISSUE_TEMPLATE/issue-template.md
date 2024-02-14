@@ -1,10 +1,7 @@
 ---
-name: Issue template
-about: Remind contributors to not share sensitive data
-title: ''
-labels: ''
-assignees: ''
+name: New issue
+about: Create a new issue
 
 ---
 
-<!-- QUANTCO EMPLOYEES: This is an open-source repository. Do not share sensitive information. -->
+<!-- ⚠️ This is an open-source repository. Do not share sensitive information. -->
