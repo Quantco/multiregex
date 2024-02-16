@@ -57,3 +57,13 @@ allow_redefinition = true
 [tool.pytest.ini_options]
 # This will be pytest's future default.
 addopts = "--import-mode=importlib --color=yes"
+
+[tool.conda-env-lock]
+variants = [
+  { lockfile = ".conda_lock_files/py36_lin64.yml",  platform = "linux-64", dependency_file = "environment.yml", constraints = [] },
+  { lockfile = ".conda_lock_files/py312_lin64.yml", platform = "linux-64", dependency_file = "environment.yml", constraints = [] },
+  { lockfile = ".conda_lock_files/py36_win64.yml",  platform = "win-64",   dependency_file = "environment.yml", constraints = [] },
+  { lockfile = ".conda_lock_files/py312_win64.yml", platform = "win-64",   dependency_file = "environment.yml", constraints = [] },
+  { lockfile = ".conda_lock_files/py36_osx64.yml",  platform = "osx-64",   dependency_file = "environment.yml", constraints = [] },
+  { lockfile = ".conda_lock_files/py312_osx64.yml", platform = "osx-64",   dependency_file = "environment.yml", constraints = [] },
+]
