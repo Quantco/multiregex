@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment-file: []
-        os: []
+        # environment-file: []
+        # os: []
         include:
           - { os: ubuntu-latest,  environment-file: .conda_lock_files/py36_lin64.yml }
           - { os: ubuntu-latest,  environment-file: .conda_lock_files/py312_lin64.yml }
