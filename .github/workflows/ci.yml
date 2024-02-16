@@ -11,14 +11,12 @@ defaults:
 
 jobs:
   tests:
-    name: Tests - Python ${{ matrix.python-version }} - ${{ matrix.os }}
+    name: Tests - ${{ matrix.environment-file }}
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        # environment-file: []
-        # os: []
         include:
           - { os: ubuntu-latest,  environment-file: .conda_lock_files/py36_lin64.yml }
           - { os: ubuntu-latest,  environment-file: .conda_lock_files/py312_lin64.yml }
