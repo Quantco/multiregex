@@ -32,7 +32,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up Micromamba env
-        uses: mamba-org/setup-micromamba@25949dd7cbed1382ed14df19c63f04c72c72cd67
+        uses: mamba-org/setup-micromamba@93692eeb9c32b394efd4c3190717e877a1bf45ab
         with:
           environment-file: ${{ matrix.environment-file }}
           create-args: >-
