@@ -54,7 +54,7 @@ jobs:
         run: pixi run postinstall
       - name: Run mypy
         run: pixi run mypy
-        
+
   pre-commit-checks:
     name: Pre-commit Checks
     timeout-minutes: 30
