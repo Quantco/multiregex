@@ -35,7 +35,7 @@ jobs:
       - name: Install repository
         run: pixi run -e ${{ matrix.environment }} postinstall
       - name: Run unittests
-        uses: quantco/pytest-action@v2
+        uses: pavelzw/pytest-action@v2
         with:
           report-title: Unit tests ${{ matrix.environment }}
           custom-pytest: pixi run -e ${{ matrix.environment }} pytest
