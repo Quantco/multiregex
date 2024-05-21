@@ -4,20 +4,24 @@ build-backend = "flit_core.buildapi"
 
 [project]
 name = "multiregex"
-authors = [{name="QuantCo, Inc.", email="noreply@quantco.com"}]
-
-maintainers = [{name = "Jonas Haag", email = "jonas.haag@quantco.com"}]
-
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11"
+authors = [
+  { name = "QuantCo, Inc.", email = "noreply@quantco.com" },
+  { name = "Jonas Haag", email = "jonas@lophus.org" },
 ]
 
+maintainers = [{ name = "Bela Stoyan", email = "bela.stoyan@quantco.com" }]
+
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+]
+
+requires-python = ">=3.8"
+
+dependencies = ["pyahocorasick"]
 readme = "README.md"
 dynamic = ["version", "description"]
 
@@ -26,17 +30,6 @@ Home = "https://github.com/quantco/multiregex"
 
 [tool.flit.sdist]
 exclude = [".gitignore"]
-
-[tool.black]
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.venv
-  | build
-  | dist
-)/
-'''
 
 [tool.isort]
 multi_line_output = 3
@@ -48,22 +41,36 @@ skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
 default_section = 'THIRDPARTY'
 
 [tool.mypy]
-python_version = 3.8
-ignore_missing_imports = true
+python_version = "3.8"
 no_implicit_optional = true
 check_untyped_defs = true
 allow_redefinition = true
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+ignore = [
+  "N803",  # https://docs.astral.sh/ruff/rules/invalid-argument-name
+  "N806",  # https://docs.astral.sh/ruff/rules/non-lowercase-variable-in-function
+  "E501",  # https://docs.astral.sh/ruff/faq/#is-the-ruff-linter-compatible-with-black
+]
+select = [
+  # pyflakes
+  "F",
+  # pycodestyle
+  "E", "W",
+  # isort
+  "I",
+  # pep8-naming
+  "N",
+  # pyupgrade
+  "UP",
+]
 
 [tool.pytest.ini_options]
 # This will be pytest's future default.
 addopts = "--import-mode=importlib --color=yes"
 
-[tool.conda-env-lock]
-variants = [
-  { lockfile = ".conda_lock_files/py36_lin64.yml",  platform = "linux-64", dependency_file = "environment.yml", constraints = [] },
-  { lockfile = ".conda_lock_files/py312_lin64.yml", platform = "linux-64", dependency_file = "environment.yml", constraints = [] },
-  { lockfile = ".conda_lock_files/py36_win64.yml",  platform = "win-64",   dependency_file = "environment.yml", constraints = [] },
-  { lockfile = ".conda_lock_files/py312_win64.yml", platform = "win-64",   dependency_file = "environment.yml", constraints = [] },
-  { lockfile = ".conda_lock_files/py36_osx64.yml",  platform = "osx-64",   dependency_file = "environment.yml", constraints = [] },
-  { lockfile = ".conda_lock_files/py312_osx64.yml", platform = "osx-64",   dependency_file = "environment.yml", constraints = [] },
-]
+[tool.typos.files]
+extend-exclude = ["test_utils/cpython_test_re.py"]

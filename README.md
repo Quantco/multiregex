@@ -29,7 +29,6 @@ pre-commit install
 pip install --no-build-isolation -e .
 ```
 
-
 ## Usage
 
 ```py
@@ -58,7 +57,7 @@ To be able to quickly match many regexes against a string, `multiregex` uses
 at least one can be assumed to be present in the haystack if the corresponding regex matches.
 As an example, a valid prematcher of `r"\w+\.com"` could be `[".com"]` and a valid
 prematcher of `r"(B|b)aNäNa"` could be `["b"]` or `["anäna"]`.
-Note that prematchers must be all-lowercase (in order for ``multiregex`` to be able to support ``re.IGNORECASE``).
+Note that prematchers must be all-lowercase (in order for `multiregex` to be able to support `re.IGNORECASE`).
 
 You will likely have to provide your own prematchers for all but the simplest
 regex patterns:

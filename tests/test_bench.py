@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 from multiregex import RegexMatcher
+
 from test_utils import assert_matches_equal
 
 # Simplistic Python parser

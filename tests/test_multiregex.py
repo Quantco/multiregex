@@ -2,8 +2,8 @@ import random
 import re
 
 import pytest
-
 from multiregex import AhocorasickError, RegexMatcher, generate_prematchers
+
 from test_utils import assert_matches_equal
 
 

@@ -3,8 +3,8 @@
 import re
 
 import pytest
-
 from multiregex import RegexMatcher, generate_prematchers
+
 from test_utils import assert_matches_equal, cpython_test_re
 
 
@@ -46,7 +46,7 @@ def eval_test_expr(match, expr):
         "groups": match.group(),
         "flags": match.re.flags,
     }
-    numbered_groups = [("g{}".format(i), i) for i in range(100)]  # type: Any
+    numbered_groups = [(f"g{i}", i) for i in range(100)]  # type: Any
     named_groups = [(g, g) for g in match.re.groupindex]  # type: Any
     for name, key in numbered_groups + named_groups:
         try:

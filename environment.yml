@@ -7,7 +7,7 @@ dependencies:
   - pyahocorasick
   - pip
   - pre-commit
-  - pytest>=6  # Adds --import-mode option
+  - pytest>=6 # Adds --import-mode option
   - pytest-cov
 
   # Docs
