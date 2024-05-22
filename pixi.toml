@@ -13,7 +13,8 @@ pyahocorasick = "*"
 
 [host-dependencies]
 pip = "*"
-hatchling = "*"
+setuptools = ">=61"
+setuptools-scm = "*"
 
 [feature.test.dependencies]
 pytest = ">=6,<8"
