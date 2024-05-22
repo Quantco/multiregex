@@ -32,8 +32,11 @@ dynamic = ["version"]
 [project.urls]
 Home = "https://github.com/quantco/multiregex"
 
+[tool.setuptools]
+package-dir = { "" = "src" }
+
 [tool.setuptools.packages.find]
-include = ["multiregex"]
+include = ["src/multiregex"]
 namespaces = false
 
 [tool.isort]
@@ -56,15 +59,16 @@ line-length = 88
 
 [tool.ruff.lint]
 ignore = [
-  "N803",  # https://docs.astral.sh/ruff/rules/invalid-argument-name
-  "N806",  # https://docs.astral.sh/ruff/rules/non-lowercase-variable-in-function
-  "E501",  # https://docs.astral.sh/ruff/faq/#is-the-ruff-linter-compatible-with-black
+  "N803", # https://docs.astral.sh/ruff/rules/invalid-argument-name
+  "N806", # https://docs.astral.sh/ruff/rules/non-lowercase-variable-in-function
+  "E501", # https://docs.astral.sh/ruff/faq/#is-the-ruff-linter-compatible-with-black
 ]
 select = [
   # pyflakes
   "F",
   # pycodestyle
-  "E", "W",
+  "E",
+  "W",
   # isort
   "I",
   # pep8-naming
