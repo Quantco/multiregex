@@ -65,6 +65,6 @@ jobs:
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@d72307a91ccc8a856376cdb9ff5b074a04422409
         with:
-          environments: lint
+          environments: lint default
       - name: pre-commit
         run: pixi run pre-commit-run --color=always --show-diff-on-failure
