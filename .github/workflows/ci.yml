@@ -37,14 +37,14 @@ jobs:
       - name: Run pytest
         id: pytest
         run: |
-          REPORT="$(mktemp)"
+          REPORT="${{ runner.temp }}/report"
           echo "report-path=$REPORT" >> $GITHUB_OUTPUT
-          pixi run -e ${{ matrix.environment }} pytest -v --emoji
+          pixi run -e ${{ matrix.environment }} pytest -v --md=$REPORT --emoji
         shell: bash -el {0} # use login shell to source .bashrc for environments
       - name: Add report to summary
         run: |
           echo "::group::..."
-          FINAL_REPORT="$(mktemp)"
+          FINAL_REPORT="${{ runner.temp }}/output"
           echo "# Unit tests ${{ matrix.environment }}" > "$FINAL_REPORT"
           echo "<details><summary>Click to expand!</summary>" >> "$FINAL_REPORT"
           tail -n+2 "${{ steps.pytest.outputs.report-path }}" >> "$FINAL_REPORT"
