@@ -39,7 +39,7 @@ jobs:
         run: |
           REPORT="$(mktemp)"
           echo "report-path=$REPORT" >> $GITHUB_OUTPUT
-          pixi run -e ${{ matrix.environment }} pytest -v  --md=\"$REPORT\" --emoji
+          pixi run -e ${{ matrix.environment }} pytest -v --emoji
         shell: bash -el {0} # use login shell to source .bashrc for environments
       - name: Add report to summary
         run: |
