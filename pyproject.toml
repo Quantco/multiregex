@@ -1,6 +1,8 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools", "setuptools-scm", "wheel"]
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
 
 [project]
 name = "multiregex"
@@ -8,6 +10,7 @@ authors = [
   { name = "QuantCo, Inc.", email = "noreply@quantco.com" },
   { name = "Jonas Haag", email = "jonas@lophus.org" },
 ]
+description = "Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching."
 
 maintainers = [{ name = "Bela Stoyan", email = "bela.stoyan@quantco.com" }]
 
@@ -24,15 +27,14 @@ requires-python = ">=3.8"
 
 dependencies = ["pyahocorasick"]
 readme = "README.md"
-dynamic = ["version", "description"]
+dynamic = ["version"]
 
 [project.urls]
 Home = "https://github.com/quantco/multiregex"
 
-[tool.hatch.build.targets.sdist]
-include = [
-    "/src/multiregex",
-]
+[tool.setuptools.packages.find]
+include = ["multiregex"]
+namespaces = false
 
 [tool.isort]
 multi_line_output = 3
