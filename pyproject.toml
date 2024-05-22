@@ -1,6 +1,6 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "multiregex"
@@ -28,8 +28,10 @@ dynamic = ["version", "description"]
 [project.urls]
 Home = "https://github.com/quantco/multiregex"
 
-[tool.flit.sdist]
-exclude = [".gitignore"]
+[tool.hatch.build.targets.sdist]
+include = [
+    "/multiregex",
+]
 
 [tool.isort]
 multi_line_output = 3
@@ -41,7 +43,7 @@ skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
 default_section = 'THIRDPARTY'
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.6"
 no_implicit_optional = true
 check_untyped_defs = true
 allow_redefinition = true

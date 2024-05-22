@@ -13,7 +13,7 @@ pyahocorasick = "*"
 
 [host-dependencies]
 pip = "*"
-flit = "*"
+hatchling = "*"
 
 [feature.test.dependencies]
 pytest = ">=6,<8"
