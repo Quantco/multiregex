@@ -32,9 +32,8 @@ dynamic = ["version"]
 [project.urls]
 Home = "https://github.com/quantco/multiregex"
 
-[tool.setuptools.packages.find]
-include = ["multiregex"]
-namespaces = false
+[tool.setuptools]
+packages = ["multiregex"]
 
 [tool.isort]
 multi_line_output = 3
