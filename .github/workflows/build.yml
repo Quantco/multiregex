@@ -1,0 +1,47 @@
+name: Build
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install Python build
+        run: pip install build
+      - name: Build project
+        run: python -m build
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact
+          path: dist/*
+
+  release:
+    name: Publish package
+    if: github.event_name == 'push' && github.ref_name == 'main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    environment: pypi
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: dist
+      - name: Publish package on TestPyPi
+        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450
+        with:
+          repository-url: https://test.pypi.org/legacy/
+      - name: Publish package on PyPi
+        uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450
+      - uses: actions/checkout@v4
