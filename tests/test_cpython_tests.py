@@ -3,8 +3,8 @@
 import re
 
 import pytest
-from multiregex import RegexMatcher, generate_prematchers
 
+from multiregex import RegexMatcher, generate_prematchers
 from test_utils import assert_matches_equal, cpython_test_re
 
 
