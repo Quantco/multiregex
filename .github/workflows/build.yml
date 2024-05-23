@@ -1,10 +1,14 @@
 name: Build
 on:
-  push:
-    branches: [main]
   pull_request:
-permissions:
-  contents: write
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+  release:
+    types:
+      - published
 
 jobs:
   build:
@@ -25,12 +29,11 @@ jobs:
 
   release:
     name: Publish package
-    if: github.event_name == 'push' && github.ref_name == 'main'
+    if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: write
     environment: pypi
     steps:
       - uses: actions/download-artifact@v4
@@ -43,4 +46,3 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
       - name: Publish package on PyPi
         uses: pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450
-      - uses: actions/checkout@v4
