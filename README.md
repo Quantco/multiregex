@@ -17,8 +17,8 @@ See [this introductory blog post](https://tech.quantco.com/2022/07/31/multiregex
 You can install the package in development mode using:
 
 ```bash
-git clone https://github.com/quantco/coarse_regression
-cd coarse-regression
+git clone https://github.com/quantco/multiregex
+cd multiregex
 
 pixi run pre-commit-install
 pixi run postinstall

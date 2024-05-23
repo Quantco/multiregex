@@ -20,7 +20,9 @@ automatically generated prematchers.
 
 import collections
 import functools
+import importlib
 import re
+import warnings
 
 try:
     sre_constants = re._constants  # type: ignore
@@ -43,7 +45,12 @@ from typing import (
 
 import ahocorasick
 
-__version__ = "2.0.0"
+try:
+    __version__ = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError as e:
+    warnings.warn(f"Could not determine version of {__name__}", stacklevel=1)
+    warnings.warn(str(e), stacklevel=1)
+    __version__ = "unknown"
 
 
 V = TypeVar("V")
