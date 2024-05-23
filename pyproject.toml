@@ -32,11 +32,8 @@ dynamic = ["version"]
 [project.urls]
 Home = "https://github.com/quantco/multiregex"
 
-[tool.setuptools]
-package-dir = { "" = "src" }
-
 [tool.setuptools.packages.find]
-include = ["src/multiregex"]
+include = ["multiregex"]
 namespaces = false
 
 [tool.isort]
@@ -49,10 +46,13 @@ skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
 default_section = 'THIRDPARTY'
 
 [tool.mypy]
+mypy_path = "stubs"
 python_version = "3.8"
 no_implicit_optional = true
 check_untyped_defs = true
 allow_redefinition = true
+explicit_package_bases = true
+exclude = ["docs/"]
 
 [tool.ruff]
 line-length = 88
