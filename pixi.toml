@@ -39,6 +39,7 @@ ruff = "*"
 prettier = "*"
 pre-commit-hooks = "*"
 typos = "*"
+taplo = "*"
 
 [feature.lint.tasks]
 pre-commit-install = "pre-commit install"

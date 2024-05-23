@@ -57,3 +57,9 @@ repos:
         language: system
         types: [python]
         require_serial: true
+      # taplo
+      - id: taplo
+        name: taplo
+        entry: pixi run -e lint taplo format
+        language: system
+        types: [toml]
