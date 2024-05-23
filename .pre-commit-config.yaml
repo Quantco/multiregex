@@ -1,28 +1,65 @@
 repos:
-  - repo: https://github.com/Quantco/pre-commit-mirrors-black
-    rev: 24.1.1
+  - repo: local
     hooks:
-      - id: black-conda
-        args:
-          - --safe
-          - --target-version=py36
-  - repo: https://github.com/Quantco/pre-commit-mirrors-flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8-conda
-  - repo: https://github.com/Quantco/pre-commit-mirrors-isort
-    rev: 5.13.2
-    hooks:
-      - id: isort-conda
-        additional_dependencies: [-c, conda-forge, toml=0.10.2]
-  - repo: https://github.com/Quantco/pre-commit-mirrors-mypy
-    rev: 1.8.0
-    hooks:
-      - id: mypy-conda
-        additional_dependencies: [-c, conda-forge, types-setuptools]
-  - repo: https://github.com/Quantco/pre-commit-mirrors-pyupgrade
-    rev: 3.15.0
-    hooks:
-      - id: pyupgrade-conda
-        args:
-          - --py3-plus
+      # docformatter
+      - id: docformatter
+        name: docformatter
+        entry: pixi run -e lint docformatter -i
+        language: system
+        types: [python]
+      # ruff
+      - id: ruff
+        name: ruff
+        entry: pixi run -e lint ruff check --fix --exit-non-zero-on-fix --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      - id: ruff-format
+        name: ruff-format
+        entry: pixi run -e lint ruff format --force-exclude
+        language: system
+        types_or: [python, pyi]
+        require_serial: true
+      # prettier
+      - id: prettier
+        name: prettier
+        entry: pixi run -e lint prettier --write --list-different --ignore-unknown
+        language: system
+        types: [text]
+        files: \.(md|yml|yaml)$
+      # pre-commit-hooks
+      - id: trailing-whitespace-fixer
+        name: trailing-whitespace-fixer
+        entry: pixi run -e lint trailing-whitespace-fixer
+        language: system
+        types: [text]
+      - id: end-of-file-fixer
+        name: end-of-file-fixer
+        entry: pixi run -e lint end-of-file-fixer
+        language: system
+        types: [text]
+      - id: check-merge-conflict
+        name: check-merge-conflict
+        entry: pixi run -e lint check-merge-conflict --assume-in-merge
+        language: system
+        types: [text]
+      # typos
+      - id: typos
+        name: typos
+        entry: pixi run -e lint typos --force-exclude
+        language: system
+        types: [text]
+        require_serial: true
+      # mypy
+      - id: mypy
+        name: mypy
+        entry: pixi run -e default mypy
+        language: system
+        types: [python]
+        require_serial: true
+      # taplo
+      - id: taplo
+        name: taplo
+        entry: pixi run -e lint taplo format
+        language: system
+        types: [toml]

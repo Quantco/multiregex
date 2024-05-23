@@ -7,6 +7,10 @@
 Changelog
 =========
 
+X.Y.Z (unreleased)
+------------------
+- Included a py.typed file to indicate that the package is fully typed.
+
 2.0.1 (2023-06-11)
 ------------------
 

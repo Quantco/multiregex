@@ -10,47 +10,51 @@ defaults:
     shell: bash -el {0}
 
 jobs:
-  tests:
-    name: Tests - ${{ matrix.environment-file }}
+  unit-tests:
+    name: pytest
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { os: ubuntu-latest,  environment-file: .conda_lock_files/py36_lin64.yml }
-          - { os: ubuntu-latest,  environment-file: .conda_lock_files/py312_lin64.yml }
-          - { os: windows-latest, environment-file: .conda_lock_files/py36_win64.yml }
-          - { os: windows-latest, environment-file: .conda_lock_files/py312_win64.yml }
-          - { os: macos-latest,   environment-file: .conda_lock_files/py36_osx64.yml }
-          - { os: macos-latest,   environment-file: .conda_lock_files/py312_osx64.yml }
+          - { os: ubuntu-latest, environment: py38 }
+          - { os: ubuntu-latest, environment: py312 }
+          - { os: windows-latest, environment: py38 }
+          - { os: windows-latest, environment: py312 }
+          - { os: macos-latest, environment: py38 }
+          - { os: macos-latest, environment: py312 }
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
-      - name: Fetch full git history
-        run: git fetch --prune --unshallow
-      - name: Set up Micromamba env
-        uses: mamba-org/setup-micromamba@422500192359a097648154e8db4e39bdb6c6eed7
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.0
         with:
-          environment-file: ${{ matrix.environment-file }}
-          create-args: >-
-            pytest-emoji
-            pytest-md
-      - name: pip install
-        run: pip install -e .
-      - name: Run pytest
-        uses: pavelzw/pytest-action@v2
+          environments: ${{ matrix.environment }}
+      - name: Install repository
+        run: pixi run -e ${{ matrix.environment }} postinstall
+      - name: Run unittests
+        uses: quantco/pytest-action@v2
+        with:
+          report-title: Unit tests ${{ matrix.environment }}
+          custom-pytest: pixi run -e ${{ matrix.environment }} pytest
 
   pre-commit-checks:
-    name: Pre-commit checks - Python 3.12
+    name: Pre-commit Checks
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
-      - name: Run pre-commit-conda
-        uses: quantco/pre-commit-conda@v1
         with:
-          python-version: "3.12"
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@v0.8.0
+        with:
+          environments: lint default
+      - name: pre-commit
+        run: pixi run pre-commit-run --color=always --show-diff-on-failure

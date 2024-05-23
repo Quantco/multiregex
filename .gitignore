@@ -120,3 +120,8 @@ mlruns
 
 # direnv
 .envrc
+# pixi environments
+.pixi
+*.egg-info
+
+.ruff_cache

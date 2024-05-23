@@ -1,4 +1,5 @@
-r"""Speed up regex matching with non-regex substring "prematchers", similar to Bloom filters.
+r"""Speed up regex matching with non-regex substring "prematchers", similar to
+Bloom filters.
 
 For each regex pattern we use a list of simple (non-regex) substring prematchers.
 When evaluating regex patterns on a string, we use the prematchers to restrict
@@ -19,7 +20,9 @@ automatically generated prematchers.
 
 import collections
 import functools
+import importlib
 import re
+import warnings
 
 try:
     sre_constants = re._constants  # type: ignore
@@ -42,7 +45,12 @@ from typing import (
 
 import ahocorasick
 
-__version__ = "2.0.0"
+try:
+    __version__ = importlib.metadata.version(__name__)
+except importlib.metadata.PackageNotFoundError as e:
+    warnings.warn(f"Could not determine version of {__name__}", stacklevel=1)
+    warnings.warn(str(e), stacklevel=1)
+    __version__ = "unknown"
 
 
 V = TypeVar("V")
@@ -110,9 +118,7 @@ class RegexMatcher:
         def safe_set(iterable):
             if isinstance(iterable, str):
                 raise TypeError(
-                    "Refusing to interpret {!r} as a list of patterns, pass a list of strings instead".format(
-                        iterable
-                    )
+                    f"Refusing to interpret {iterable!r} as a list of patterns, pass a list of strings instead"
                 )
             else:
                 return set(iterable)
@@ -195,10 +201,8 @@ class RegexMatcher:
 
     """Alias for ``run(re.search, ...)``."""
     search = functools.partialmethod(run, re.search)
-
     """Alias for ``run(re.match, ...)``."""
     match = functools.partialmethod(run, re.match)
-
     """Alias for ``run(re.fullmatch, ...)``."""
     fullmatch = functools.partialmethod(run, re.fullmatch)
 
@@ -253,18 +257,17 @@ class RegexMatcher:
 def validate_prematcher(prematcher: str) -> None:
     if not prematcher or any(map(str.isupper, prematcher)):
         raise ValueError(
-            "Prematcher {!r} must be non-empty, all-lowercase, all-ASCII".format(
-                prematcher
-            )
+            f"Prematcher {prematcher!r} must be non-empty, all-lowercase, all-ASCII"
         )
 
 
 def generate_prematchers(pattern: Pattern) -> Prematchers:
     """Generate fallback/default prematchers for the given regex `pattern`.
 
-    Currently the fallback prematcher is just the set of longest terminal texts
-    in the pattern, eg. "Fast(er)? regex(es| matching)" -> {" regex"}. One level of
-    branches with the "|" character is supported, ie. "(a|bb|ccc)" -> {"ccc", "a", "bb"}.
+    Currently the fallback prematcher is just the set of longest
+    terminal texts in the pattern, eg. "Fast(er)? regex(es| matching)"
+    -> {" regex"}. One level of branches with the "|" character is
+    supported, ie. "(a|bb|ccc)" -> {"ccc", "a", "bb"}.
     """
 
     def _get_top_level_prematcher(sre_ast):
@@ -288,7 +291,7 @@ def generate_prematchers(pattern: Pattern) -> Prematchers:
         if all(child_prematchers):
             return child_prematchers
 
-    raise ValueError("Could not generate prematchers for {!r}".format(pattern.pattern))
+    raise ValueError(f"Could not generate prematchers for {pattern.pattern!r}")
 
 
 def _simplify_sre_ast(sre_ast):
@@ -320,7 +323,8 @@ def _sre_find_terminals(sre_ast):
 
 
 def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V]":
-    """Make an ahocorasick automaton from a dictionary of `needle -> value` items."""
+    """Make an ahocorasick automaton from a dictionary of `needle -> value`
+    items."""
     automaton = ahocorasick.Automaton()  # type: ahocorasick.Automaton[V]
     for word, value in words.items():
         _ahocorasick_ensure_successful(automaton.add_word(word, value))
@@ -329,6 +333,6 @@ def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V
 
 
 def _ahocorasick_ensure_successful(res):
-    """pyahocorasick returns errors as bools."""
+    """Pyahocorasick returns errors as bools."""
     if res is False:
         raise AhocorasickError("Error performing ahocorasick call")
