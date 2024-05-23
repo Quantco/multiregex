@@ -30,7 +30,7 @@ jobs:
       - name: Fetch full git history
         run: git fetch --prune --unshallow
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@19b5e6071f70a82d3c5741d7b3f98a71d192eb20
+        uses: prefix-dev/setup-pixi@v0.8.0
         with:
           environments: ${{ matrix.environment }}
       - name: Install repository
@@ -49,7 +49,7 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@d72307a91ccc8a856376cdb9ff5b074a04422409
+        uses: prefix-dev/setup-pixi@v0.8.0
         with:
           environments: lint default
       - name: pre-commit
