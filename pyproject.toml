@@ -49,7 +49,7 @@ skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
 default_section = 'THIRDPARTY'
 
 [tool.mypy]
-python_version = "3.6"
+python_version = "3.8"
 no_implicit_optional = true
 check_untyped_defs = true
 allow_redefinition = true

@@ -50,3 +50,10 @@ repos:
         language: system
         types: [text]
         require_serial: true
+      # mypy
+      - id: mypy
+        name: mypy
+        entry: pixi run -e default mypy
+        language: system
+        types: [python]
+        require_serial: true
