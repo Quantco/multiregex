@@ -23,6 +23,12 @@ pytest-md = "*"
 pytest-emoji = "*"
 mypy = "*"
 
+[feature.build.dependencies]
+build = "*"
+
+[feature.build.tasks]
+build-wheel = "python -m build --no-isolation ."
+
 [feature.test.tasks]
 test = "pytest"
 
@@ -47,4 +53,5 @@ python = "3.12.*"
 default = ["test"]
 py38 = ["py38", "test"]
 py312 = ["py312", "test"]
+build = ["build"]
 lint = ["lint"]
