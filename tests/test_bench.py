@@ -3,7 +3,6 @@ import re
 from pathlib import Path
 
 from multiregex import RegexMatcher
-
 from test_utils import assert_matches_equal
 
 # Simplistic Python parser
@@ -33,7 +32,7 @@ def test_python_parser():
 
 
 def test_parse_myself():
-    myself = Path(__file__).parents[1] / "src" / "multiregex" / "__init__.py"
+    myself = Path(__file__).parents[1] / "multiregex" / "__init__.py"
     with myself.open() as f:
         myself_src = f.read().splitlines()
     slow_matcher = make_slow_matcher(python_parser.values())
