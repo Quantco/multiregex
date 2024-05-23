@@ -11,13 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@19b5e6071f70a82d3c5741d7b3f98a71d192eb20
         with:
-          python-version: "3.9"
-      - name: Install Python build
-        run: pip install build
+          environments: build
       - name: Build project
-        run: python -m build
+        run: pixi run -e build build-wheel
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
