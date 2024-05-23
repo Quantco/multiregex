@@ -25,7 +25,6 @@ mypy = "*"
 
 [feature.test.tasks]
 test = "pytest"
-mypy = "mypy ."
 
 [feature.lint.dependencies]
 pre-commit = "*"
