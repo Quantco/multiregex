@@ -17,16 +17,12 @@ See [this introductory blog post](https://tech.quantco.com/2022/07/31/multiregex
 You can install the package in development mode using:
 
 ```bash
-git clone git@github.com:quantco/multiregex.git
-cd multiregex
+git clone https://github.com/quantco/coarse_regression
+cd coarse-regression
 
-# create and activate a fresh environment named multiregex
-# see environment.yml for details
-mamba env create
-conda activate multiregex
-
-pre-commit install
-pip install --no-build-isolation -e .
+pixi run pre-commit-install
+pixi run postinstall
+pixi run test
 ```
 
 ## Usage
