@@ -123,3 +123,5 @@ mlruns
 # pixi environments
 .pixi
 *.egg-info
+
+.ruff_cache
