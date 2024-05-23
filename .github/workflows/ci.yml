@@ -28,9 +28,8 @@ jobs:
       - name: Checkout branch
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref }}
-      - name: Fetch full git history
-        run: git fetch --prune --unshallow
+          ref: ${{ github.ref }}
+          fetch-depth: 0
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.8.0
         with:
@@ -50,6 +49,9 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
       - name: Set up pixi
         uses: prefix-dev/setup-pixi@v0.8.0
         with:
