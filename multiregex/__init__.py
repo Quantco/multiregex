@@ -20,7 +20,7 @@ automatically generated prematchers.
 
 import collections
 import functools
-import importlib
+import importlib.metadata
 import re
 import warnings
 
