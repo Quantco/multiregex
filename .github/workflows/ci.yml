@@ -31,7 +31,7 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.0
+        uses: prefix-dev/setup-pixi@v0.8.1
         with:
           environments: ${{ matrix.environment }}
       - name: Install repository
@@ -53,7 +53,7 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.0
+        uses: prefix-dev/setup-pixi@v0.8.1
         with:
           environments: lint default
       - name: pre-commit
