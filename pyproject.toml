@@ -68,9 +68,9 @@ check_untyped_defs = true
 # If you run into `missing library stubs or py.typed marker` errors
 # and no stubs are available for this library, you can add an override
 # to ignore the missing imports.
-# [[tool.mypy.overrides]]
-# module = ["my_module"]
-# ignore_missing_imports = true
+[[tool.mypy.overrides]]
+module = ["ahocorasick"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
