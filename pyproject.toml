@@ -11,9 +11,8 @@ authors = [
   { name = "Jonas Haag", email = "jonas@lophus.org" },
 ]
 description = "Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching."
-
+dynamic = ["version"]
 maintainers = [{ name = "Bela Stoyan", email = "bela.stoyan@quantco.com" }]
-
 classifiers = [
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.8",
@@ -22,34 +21,17 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
-
 requires-python = ">=3.8"
-
-dependencies = ["pyahocorasick"]
 readme = "README.md"
-dynamic = ["version"]
+dependencies = ["pyahocorasick"]
 
 [project.urls]
-Home = "https://github.com/quantco/multiregex"
+repository = "https://github.com/quantco/multiregex"
 
-[tool.setuptools]
-packages = ["multiregex"]
+[tool.setuptools.packages.find]
+include = ["multiregex"]
 
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = true
-ensure_newline_before_comments = true
-line_length = 88
-known_first_party = "multiregex"
-skip_glob = '\.eggs/*,\.git/*,\.venv/*,build/*,dist/*'
-default_section = 'THIRDPARTY'
-
-[tool.mypy]
-mypy_path = "stubs"
-python_version = "3.8"
-no_implicit_optional = true
-check_untyped_defs = true
-allow_redefinition = true
+[project.scripts]
 
 [tool.ruff]
 line-length = 88
@@ -74,9 +56,24 @@ select = [
   "UP",
 ]
 
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = '3.8'
+no_implicit_optional = true
+check_untyped_defs = true
+
+# If you run into `missing library stubs or py.typed marker` errors
+# and no stubs are available for this library, you can add an override
+# to ignore the missing imports.
+# [[tool.mypy.overrides]]
+# module = ["my_module"]
+# ignore_missing_imports = true
+
 [tool.pytest.ini_options]
-# This will be pytest's future default.
-addopts = "--import-mode=importlib --color=yes"
+testpaths = ["tests"]
 
 [tool.typos.files]
 extend-exclude = ["test_utils/cpython_test_re.py"]

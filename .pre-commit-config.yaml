@@ -1,12 +1,16 @@
+exclude: ^(\.copier-answers\.yml)|.pixi$
 repos:
   - repo: local
     hooks:
-      # docformatter
-      - id: docformatter
-        name: docformatter
-        entry: pixi run -e lint docformatter -i
+      # ensure pixi environments are up to date
+      # workaround for https://github.com/prefix-dev/pixi/issues/1482
+      - id: pixi-install
+        name: pixi-install
+        entry: pixi install -e default -e lint
         language: system
-        types: [python]
+        always_run: true
+        require_serial: true
+        pass_filenames: false
       # ruff
       - id: ruff
         name: ruff
@@ -20,6 +24,13 @@ repos:
         language: system
         types_or: [python, pyi]
         require_serial: true
+      # mypy
+      - id: mypy
+        name: mypy
+        entry: pixi run -e default mypy
+        language: system
+        types: [python]
+        require_serial: true
       # prettier
       - id: prettier
         name: prettier
@@ -27,6 +38,12 @@ repos:
         language: system
         types: [text]
         files: \.(md|yml|yaml)$
+      # taplo
+      - id: taplo
+        name: taplo
+        entry: pixi run -e lint taplo format
+        language: system
+        types: [toml]
       # pre-commit-hooks
       - id: trailing-whitespace-fixer
         name: trailing-whitespace-fixer
@@ -50,16 +67,3 @@ repos:
         language: system
         types: [text]
         require_serial: true
-      # mypy
-      - id: mypy
-        name: mypy
-        entry: pixi run -e default mypy
-        language: system
-        types: [python]
-        require_serial: true
-      # taplo
-      - id: taplo
-        name: taplo
-        entry: pixi run -e lint taplo format
-        language: system
-        types: [toml]
