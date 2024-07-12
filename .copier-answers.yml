@@ -1,11 +1,12 @@
 # This file is managed by Copier; DO NOT EDIT OR REMOVE.
-_commit: v0.1.0
+_commit: v0.1.0-1-g40f119c
 _src_path: https://github.com/quantco/copier-template-python-open-source
 add_autobump_workflow: false
+author_email: noreply@quantco.com
+author_name: QuantCo, Inc.
 github_url: https://github.com/quantco/multiregex
 github_user: pavelzw
 minimal_python_version: py38
-project_name: multiregex
 project_short_description: Quickly match many regexes against a string. Provides 2-10x
     speedups over naïve regex matching.
 project_slug: multiregex
