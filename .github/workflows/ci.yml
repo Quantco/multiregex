@@ -1,60 +1,55 @@
 name: CI
 on:
+  pull_request:
   push:
     branches:
       - main
-  pull_request:
 
-defaults:
-  run:
-    shell: bash -el {0}
+# Automatically stop old builds on the same branch/PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  unit-tests:
-    name: pytest
-    timeout-minutes: 10
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { os: ubuntu-latest, environment: py38 }
-          - { os: ubuntu-latest, environment: py312 }
-          - { os: windows-latest, environment: py38 }
-          - { os: windows-latest, environment: py312 }
-          - { os: macos-latest, environment: py38 }
-          - { os: macos-latest, environment: py312 }
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
-      - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.1
-        with:
-          environments: ${{ matrix.environment }}
-      - name: Install repository
-        run: pixi run -e ${{ matrix.environment }} postinstall
-      - name: Run unittests
-        uses: quantco/pytest-action@v2
-        with:
-          report-title: Unit tests ${{ matrix.environment }}
-          custom-pytest: pixi run -e ${{ matrix.environment }} pytest
-
-  pre-commit-checks:
-    name: Pre-commit Checks
+  pre-commit:
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 0
       - name: Set up pixi
-        uses: prefix-dev/setup-pixi@v0.8.1
+        uses: prefix-dev/setup-pixi@ba3bb36eb2066252b2363392b7739741bb777659
         with:
-          environments: lint default
+          environments: default lint
       - name: pre-commit
         run: pixi run pre-commit-run --color=always --show-diff-on-failure
+
+  pytest:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        environment:
+          - py38
+          - py39
+          - py310
+          - py311
+          - py312
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up pixi
+        uses: prefix-dev/setup-pixi@ba3bb36eb2066252b2363392b7739741bb777659
+        with:
+          environments: ${{ matrix.environment }}
+      - name: Install repository
+        run: pixi run -e ${{ matrix.environment }} postinstall
+      - name: Run pytest
+        run: pixi run -e ${{ matrix.environment }} test-coverage --color=yes

@@ -1,10 +1,9 @@
 # multiregex
 
-[![CI](https://github.com/Quantco/multiregex/actions/workflows/ci.yml/badge.svg)](https://github.com/Quantco/multiregex/actions/workflows/ci.yml)
-[![Documentation](https://img.shields.io/badge/docs-latest-success?style=plastic)](https://docs.dev.quantco.cloud/qc-github-artifacts/Quantco/multiregex/latest/index.html)
-[![conda-forge](https://img.shields.io/conda/vn/conda-forge/multiregex?logoColor=white&logo=conda-forge)](https://anaconda.org/conda-forge/multiregex)
-[![pypi-version](https://img.shields.io/pypi/v/multiregex.svg?logo=pypi&logoColor=white)](https://pypi.org/project/multiregex)
-[![python-version](https://img.shields.io/pypi/pyversions/multiregex?logoColor=white&logo=python)](https://pypi.org/project/multiregex)
+[![CI](https://img.shields.io/github/actions/workflow/status/quantco/multiregex/ci.yml?style=flat-square&branch=main)](https://github.com/quantco/multiregex/actions/workflows/ci.yml)
+[![conda-forge](https://img.shields.io/conda/vn/conda-forge/multiregex?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/multiregex)
+[![pypi-version](https://img.shields.io/pypi/v/multiregex.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/multiregex)
+[![python-version](https://img.shields.io/pypi/pyversions/multiregex?logoColor=white&logo=python&style=flat-square)](https://pypi.org/project/multiregex)
 
 Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching.
 
@@ -14,6 +13,7 @@ See [this introductory blog post](https://tech.quantco.com/2022/07/31/multiregex
 
 ## Installation
 
+This project is managed by [pixi](https://pixi.sh).
 You can install the package in development mode using:
 
 ```bash
