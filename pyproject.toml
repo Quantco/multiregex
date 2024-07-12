@@ -6,11 +6,11 @@ version_scheme = "post-release"
 
 [project]
 name = "multiregex"
+description = "Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching."
 authors = [
   { name = "QuantCo, Inc.", email = "noreply@quantco.com" },
   { name = "Jonas Haag", email = "jonas@lophus.org" },
 ]
-description = "Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching."
 dynamic = ["version"]
 maintainers = [{ name = "Bela Stoyan", email = "bela.stoyan@quantco.com" }]
 classifiers = [

@@ -40,6 +40,10 @@ jobs:
           - py310
           - py311
           - py312
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
