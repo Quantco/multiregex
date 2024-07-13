@@ -28,6 +28,14 @@ build = "*"
 [feature.build.tasks]
 build-wheel = "python -m build --no-isolation ."
 
+[feature.docs.dependencies]
+mkdocs-material = "*"
+mkdocstrings = "*"
+mkdocstrings-python = "*"
+[feature.docs.tasks]
+docs = "mkdocs serve"
+docs-build = "mkdocs build --strict"
+
 [feature.lint.dependencies]
 pre-commit = "*"
 insert-license-header = "*"
@@ -60,4 +68,5 @@ py310 = ["py310", "test"]
 py311 = ["py311", "test"]
 py312 = ["py312", "test"]
 build = ["build"]
+docs = ["docs"]
 lint = { features = ["lint"], no-default-feature = true }
