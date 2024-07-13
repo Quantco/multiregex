@@ -1,16 +1,18 @@
-r"""Speed up regex matching with non-regex substring "prematchers", similar to
-Bloom filters.
+r"""Speed up regex matching with non-regex substring "prematchers", similar to Bloom filters.
 
 For each regex pattern we use a list of simple (non-regex) substring prematchers.
 When evaluating regex patterns on a string, we use the prematchers to restrict
 the set of regex patterns to be run. Hence, the prematchers _must_ match each string
 unless it's impossible for the corresponding regex to match, similar to Bloom filters.
 
-Examples:
-    r"\bfoo\b"          -> ["foo"]
-    r"(foo|bar) \s*"    -> ["foo ", "bar "]
-    r"Gemäß Richtlinie" -> ["gemäß richtlinie"]
-    # Prematchers are all-lowercase (to support re.IGNORECASE).
+Examples
+--------
+```python
+r"\bfoo\b"          -> ["foo"]
+r"(foo|bar) \s*"    -> ["foo ", "bar "]
+r"Gemäß Richtlinie" -> ["gemäß richtlinie"]
+# Prematchers are all-lowercase (to support re.IGNORECASE).
+```
 
 Prematchers are attempted to be automatically generated from the regexes, see
 `RegexMatcher.generate_prematchers`.  You must provide a handcrafted list of
@@ -31,6 +33,7 @@ except AttributeError:
     import sre_constants
     import sre_parse
 from typing import (
+    Callable,
     Dict,
     Iterable,
     List,
@@ -68,12 +71,13 @@ class RegexMatcher:
         patterns: Iterable[
             Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
-        count_prematcher_false_positives=False,
+        count_prematcher_false_positives: bool = False,
     ):
-        """
+        """Create a new `RegexMatcher` instance.
+
         Parameters
         ----------
-        patterns : list of patterns or (pattern, prematchers) tuples
+        patterns: list of patterns or (pattern, prematchers) tuples
             The patterns to match against. Patterns may either be instances of
             `re.Pattern` (results from `re.compile`) or strings.
             If given as list of `(pattern, prematchers)` tuples, `prematchers`
@@ -81,8 +85,7 @@ class RegexMatcher:
             prematchers using `generate_prematchers`. To disable prematchers for
             a specific pattern (ie., always run the "slow" matcher without any
             prematching), use a `(pattern, []`) tuple.
-        count_prematcher_false_positives : bool, default: False
-            If true, enable "profiling" to check the effectiveness of prematchers on
+        count_prematcher_false_positives: If true, enable "profiling" to check the effectiveness of prematchers on
             the input strings given to ``search``, ``match``, and ``fullmatch``.
             Use ``format_prematcher_false_positives`` to retrieve the profile.
         """
@@ -163,16 +166,16 @@ class RegexMatcher:
                 )
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
-    def run(self, match_func, s, enable_prematchers=True):
+    def run(self, match_func: Callable[[Pattern, str], re.Match], s: str, enable_prematchers: bool = True):
         """Quickly run `match_func` against `s` for all patterns.
 
         Parameters
         ----------
-        match_func : Callable[str] -> Match
+        match_func
             The base matching function, eg. `re.search`.
-        s : str
+        s
             The string to match against.
-        enable_prematchers : bool (default True)
+        enable_prematchers
             If false, do not use prematchers; use `match_func` only.
         """
         if enable_prematchers:
@@ -322,8 +325,7 @@ def _sre_find_terminals(sre_ast):
 
 
 def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V]":
-    """Make an ahocorasick automaton from a dictionary of `needle -> value`
-    items."""
+    """Make an ahocorasick automaton from a dictionary of `needle -> value` items."""
     automaton = ahocorasick.Automaton()  # type: ahocorasick.Automaton[V]
     for word, value in words.items():
         _ahocorasick_ensure_successful(automaton.add_word(word, value))
