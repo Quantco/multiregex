@@ -63,7 +63,7 @@ select = [
   # pyupgrade
   "UP",
   # pydocstyle
-  "D"
+  "D",
 ]
 
 [tool.ruff.lint.pydocstyle]

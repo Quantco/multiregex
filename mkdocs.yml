@@ -49,8 +49,8 @@ plugins:
             merge_init_into_class: true
 
 nav:
-- index.md
-- api-documentation.md
+  - index.md
+  - api-documentation.md
 markdown_extensions:
   - admonition
   - pymdownx.highlight

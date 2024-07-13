@@ -166,7 +166,12 @@ class RegexMatcher:
                 )
         return _ahocorasick_make_automaton(pattern_candidates_by_prematchers)
 
-    def run(self, match_func: Callable[[Pattern, str], re.Match], s: str, enable_prematchers: bool = True):
+    def run(
+        self,
+        match_func: Callable[[Pattern, str], re.Match],
+        s: str,
+        enable_prematchers: bool = True,
+    ):
         """Quickly run `match_func` against `s` for all patterns.
 
         Parameters
