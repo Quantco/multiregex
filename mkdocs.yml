@@ -32,6 +32,11 @@ theme:
   icon:
     repo: fontawesome/brands/github-alt
     edit: material/pencil
+
+# For the optional feature of highlighting selected element after jumping to it
+extra_css:
+  - 'styles/custom.css'
+
 repo_name: quantco/multiregex
 repo_url: https://github.com/quantco/multiregex
 edit_uri: edit/main/docs/
