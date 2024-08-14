@@ -35,7 +35,7 @@ theme:
 
 # For the optional feature of highlighting selected element after jumping to it
 extra_css:
-  - 'styles/custom.css'
+  - styles/custom.css
 
 repo_name: quantco/multiregex
 repo_url: https://github.com/quantco/multiregex
