@@ -1,0 +1,7 @@
+/*
+Allows to highlight the specific entry that is jumped to when clicking on an internal link.
+*/
+:target {
+    border: 1px solid red;
+    border-radius: 5px;
+}

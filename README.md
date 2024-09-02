@@ -1,6 +1,7 @@
 # multiregex
 
 [![CI](https://img.shields.io/github/actions/workflow/status/quantco/multiregex/ci.yml?style=flat-square&branch=main)](https://github.com/quantco/multiregex/actions/workflows/ci.yml)
+[![Documentation](https://img.shields.io/badge/docs-7E56C2?style=flat-square)](https://quantco.github.io/multiregex)
 [![conda-forge](https://img.shields.io/conda/vn/conda-forge/multiregex?logoColor=white&logo=conda-forge&style=flat-square)](https://prefix.dev/channels/conda-forge/packages/multiregex)
 [![pypi-version](https://img.shields.io/pypi/v/multiregex.svg?logo=pypi&logoColor=white&style=flat-square)](https://pypi.org/project/multiregex)
 [![python-version](https://img.shields.io/pypi/pyversions/multiregex?logoColor=white&logo=python&style=flat-square)](https://pypi.org/project/multiregex)
