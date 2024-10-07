@@ -20,6 +20,8 @@ jobs:
           environments: build
       - name: Build project
         run: pixi run -e build build-wheel
+      - name: Check package
+        run: pixi run -e build check-wheel
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
