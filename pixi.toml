@@ -24,9 +24,11 @@ test = "pytest"
 test-coverage = "pytest --cov=multiregex --cov-report=xml --cov-report=term-missing"
 
 [feature.build.dependencies]
-build = "*"
+python-build = "*"
+twine = "*"
 [feature.build.tasks]
 build-wheel = "python -m build --no-isolation ."
+check-wheel = "twine check dist/*"
 
 [feature.lint.dependencies]
 pre-commit = "*"
