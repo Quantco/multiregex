@@ -15,7 +15,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up pixi
+<<<<<<< before updating
         uses: prefix-dev/setup-pixi@92815284c57faa15cd896c4d5cfb2d59f32dc43d # v0.8.3
+=======
+        uses: prefix-dev/setup-pixi@0f64e482e3d251f735019b1bc7fb0413ead75b2c # v0.8.2
+>>>>>>> after updating
         with:
           environments: build
       - name: Build project
@@ -23,7 +27,11 @@ jobs:
       - name: Check package
         run: pixi run -e build check-wheel
       - name: Upload package
+<<<<<<< before updating
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
+=======
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+>>>>>>> after updating
         with:
           name: artifact
           path: dist/*
@@ -41,9 +49,12 @@ jobs:
         with:
           name: artifact
           path: dist
+<<<<<<< before updating
       - name: Publish package on TestPyPi
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
         with:
           repository-url: https://test.pypi.org/legacy/
+=======
+>>>>>>> after updating
       - name: Publish package on PyPi
         uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
