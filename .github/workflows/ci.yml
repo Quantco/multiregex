@@ -26,16 +26,16 @@ jobs:
 
   pytest:
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         environment:
-          - py38
           - py39
           - py310
           - py311
           - py312
+          - py313
         os:
           - ubuntu-latest
           - macos-latest

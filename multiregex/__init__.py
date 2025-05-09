@@ -30,14 +30,10 @@ try:
 except AttributeError:
     import sre_constants
     import sre_parse
+from collections.abc import Iterable
+from re import Pattern
 from typing import (
-    Dict,
-    Iterable,
-    List,
     Optional,
-    Pattern,
-    Set,
-    Tuple,
     TypeVar,
     Union,
     cast,
@@ -54,8 +50,8 @@ except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
 
 V = TypeVar("V")
 PatternOrStr = Union[Pattern, str]
-Prematchers = Set[str]
-FalsePositivesCounter = Dict[str, int]
+Prematchers = set[str]
+FalsePositivesCounter = dict[str, int]
 
 
 class AhocorasickError(Exception):
@@ -66,7 +62,7 @@ class RegexMatcher:
     def __init__(
         self,
         patterns: Iterable[
-            Union[PatternOrStr, Tuple[PatternOrStr, Optional[Iterable[str]]]]
+            Union[PatternOrStr, tuple[PatternOrStr, Optional[Iterable[str]]]]
         ],
         count_prematcher_false_positives=False,
     ):
@@ -205,7 +201,7 @@ class RegexMatcher:
     """Alias for ``run(re.fullmatch, ...)``."""
     fullmatch = functools.partialmethod(run, re.fullmatch)
 
-    def get_pattern_candidates(self, s: str) -> List[Pattern]:
+    def get_pattern_candidates(self, s: str) -> list[Pattern]:
         """Get a list of patterns that potentially match `s`.
 
         Pattern order is the same the order of `patterns` given to `__init__`.
@@ -220,7 +216,7 @@ class RegexMatcher:
 
     def get_prematcher_false_positives(
         self,
-    ) -> List[Tuple[Pattern, FalsePositivesCounter]]:
+    ) -> list[tuple[Pattern, FalsePositivesCounter]]:
         if not self.count_prematcher_false_positives:
             raise RuntimeError("Prematcher profiling not enabled")
         return sorted(
@@ -321,7 +317,7 @@ def _sre_find_terminals(sre_ast):
         i += 1
 
 
-def _ahocorasick_make_automaton(words: Dict[str, V]) -> "ahocorasick.Automaton[V]":
+def _ahocorasick_make_automaton(words: dict[str, V]) -> "ahocorasick.Automaton[V]":
     """Make an ahocorasick automaton from a dictionary of `needle -> value`
     items."""
     automaton = ahocorasick.Automaton()  # type: ahocorasick.Automaton[V]
