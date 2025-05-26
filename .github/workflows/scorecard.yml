@@ -23,7 +23,11 @@ jobs:
     name: Scorecard analysis
     runs-on: ubuntu-latest
     # `publish_results: true` only works when run from the default branch. conditional can be removed if disabled.
+<<<<<<< before updating
     if: github.event.repository.default_branch == github.ref_name || github.event_name == 'pull_request'
+=======
+    if: (github.event.repository.default_branch == github.ref_name || github.event_name == 'pull_request') && github.repository == 'quantco/multiregex'
+>>>>>>> after updating
     permissions:
       # Needed to upload the results to code-scanning dashboard.
       security-events: write
@@ -74,6 +78,10 @@ jobs:
       # Upload the results to GitHub's code scanning dashboard (optional).
       # Commenting out will disable upload of results to your repo's Code Scanning dashboard
       - name: "Upload to code-scanning"
+<<<<<<< before updating
         uses: github/codeql-action/upload-sarif@97a2bfd2a3d26d458da69e548f7f859d6fca634d # v3.28.15
+=======
+        uses: github/codeql-action/upload-sarif@ff0a06e83cb2de871e5a09832bc6a81e7276941f # v3.28.18
+>>>>>>> after updating
         with:
           sarif_file: results.sarif
