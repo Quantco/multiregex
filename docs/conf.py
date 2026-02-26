@@ -38,7 +38,7 @@ extensions = [
     "sphinxcontrib.apidoc",
 ]
 
-apidoc_module_dir = "../src/multiregex"
+apidoc_module_dir = "../multiregex"
 apidoc_output_dir = "api"
 apidoc_separate_modules = True
 apidoc_extra_args = ["--implicit-namespaces"]
