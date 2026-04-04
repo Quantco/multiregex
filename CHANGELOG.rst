@@ -7,6 +7,10 @@
 Changelog
 =========
 
+X.Y.Z (unreleased)
+------------------
+- Make ``pyproject.toml`` ``[build-system]`` configuration fully compliant with PEP 517.
+
 2.0.2 (2024-05-23)
 ------------------
 - Included a py.typed file to indicate that the package is fully typed.
