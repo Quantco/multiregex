@@ -1,8 +1,6 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm", "wheel"]
-
-[tool.setuptools_scm]
-version_scheme = "post-release"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "multiregex"
@@ -11,17 +9,18 @@ authors = [
   { name = "QuantCo, Inc.", email = "noreply@quantco.com" },
   { name = "Jonas Haag", email = "jonas@lophus.org" },
 ]
-dynamic = ["version"]
+# replaced in CI
+version = "0.0.0"
 maintainers = [{ name = "Bela Stoyan", email = "bela.stoyan@quantco.com" }]
 classifiers = [
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 dependencies = ["pyahocorasick"]
 
@@ -61,7 +60,7 @@ quote-style = "double"
 indent-style = "space"
 
 [tool.mypy]
-python_version = '3.9'
+python_version = '3.10'
 no_implicit_optional = true
 check_untyped_defs = true
 allow_redefinition = true

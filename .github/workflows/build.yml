@@ -17,13 +17,28 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up pixi
+<<<<<<< before updating
         uses: prefix-dev/setup-pixi@1b2de7f3351f171c8b4dfeb558c639cb58ed4ec0 # v0.9.5
-        with:
-          environments: build
+||||||| last update
+        uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
+=======
+        uses: prefix-dev/setup-pixi@a0af7a228712d6121d37aba47adf55c1332c9c2e # v0.9.4
+>>>>>>> after updating
+      - name: Derive version
+        id: version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: echo "version=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> $GITHUB_OUTPUT
+      - name: Replace version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -i -e "s/0.0.0/${STEPS_VERSION_OUTPUTS_VERSION}/g" pyproject.toml
+        env:
+          STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}
       - name: Build project
-        run: pixi run -e build build-wheel
+        run: pixi run build-wheel
       - name: Check package
-        run: pixi run -e build check-wheel
+        run: pixi run check-wheel
       - name: Upload package
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
         with:

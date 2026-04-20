@@ -1,22 +1,30 @@
-[project]
+[workspace]
 name = "multiregex"
 channels = ["conda-forge"]
 platforms = ["osx-arm64", "osx-64", "linux-64", "win-64"]
+preview = ["pixi-build"]
 
-[tasks]
-postinstall = "pip install --no-build-isolation --no-deps --disable-pip-version-check -e ."
+[package]
+name = "multiregex"
+[package.build.backend]
+name = "pixi-build-python"
+version = "*"
+[package.host-dependencies]
+python = ">=3.10"
+hatchling = "*"
 
 [dependencies]
-python = ">=3.9"
+multiregex = { path = "." }
 pyahocorasick = "*"
 
-[host-dependencies]
-pip = "*"
-setuptools = ">=61"
-setuptools-scm = "*"
-
 [feature.test.dependencies]
+<<<<<<< before updating
 pytest = ">=6,<8"
+||||||| last update
+pytest = ">=6"
+=======
+pytest = "*"
+>>>>>>> after updating
 pytest-cov = "*"
 mypy = "*"
 [feature.test.tasks]
@@ -24,28 +32,26 @@ test = "pytest"
 test-coverage = "pytest --cov=multiregex --cov-report=xml --cov-report=term-missing"
 
 [feature.build.dependencies]
+python = "*"
+hatchling = "*"
 python-build = "*"
-twine = "*"
-wheel = "*"
+twine = ">=6"
 [feature.build.tasks]
 build-wheel = "python -m build --no-isolation ."
 check-wheel = "twine check dist/*"
 
 [feature.lint.dependencies]
-pre-commit = "*"
-insert-license-header = "*"
-docformatter = "*"
+lefthook = "*"
 ruff = "*"
 prettier = "*"
 taplo = "*"
 pre-commit-hooks = "*"
 typos = "*"
+zizmor = "*"
 [feature.lint.tasks]
-pre-commit-install = "pre-commit install"
-pre-commit-run = "pre-commit run -a"
+pre-commit-install = "lefthook install"
+lint = "lefthook run pre-commit --all-files"
 
-[feature.py39.dependencies]
-python = "3.9.*"
 [feature.py310.dependencies]
 python = "3.10.*"
 [feature.py311.dependencies]
@@ -54,13 +60,13 @@ python = "3.11.*"
 python = "3.12.*"
 [feature.py313.dependencies]
 python = "3.13.*"
+[feature.py314.dependencies]
+python = "3.14.*"
 
 [environments]
-default = ["test"]
-py39 = ["py39", "test"]
+default = ["test", "build", "lint"]
 py310 = ["py310", "test"]
 py311 = ["py311", "test"]
 py312 = ["py312", "test"]
 py313 = ["py313", "test"]
-build = ["build"]
-lint = { features = ["lint"], no-default-feature = true }
+py314 = ["py314", "test"]
