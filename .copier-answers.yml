@@ -1,12 +1,21 @@
 # This file is managed by Copier; DO NOT EDIT OR REMOVE.
-_commit: v0.4.1
+#
+# If you want to change any of the copier answers, run one of the following:
+# 1. If you want to answer _all_ questions again:
+#   `copier update --trust --vcs-ref=:current: .`
+# 2. If you want to answer a _specific_ question again:
+#   `copier update --trust --defaults --vcs-ref=:current: --data answer_name=answer_value .`
+#
+# If you want to run this as a one-off command, prefix with:
+#   `pixi exec --spec copier --spec ruamel.yaml -- {command}`
+_commit: v0.5.2
 _src_path: https://github.com/quantco/copier-template-python-open-source
 add_autobump_workflow: false
 author_email: noreply@quantco.com
 author_name: QuantCo, Inc.
 github_url: https://github.com/quantco/multiregex
 github_user: pavelzw
-minimal_python_version: py39
+minimal_python_version: py310
 project_short_description: Quickly match many regexes against a string. Provides 2-10x
     speedups over naïve regex matching.
 project_slug: multiregex
