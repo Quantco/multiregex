@@ -7,6 +7,7 @@ version_scheme = "post-release"
 [project]
 name = "multiregex"
 description = "Quickly match many regexes against a string. Provides 2-10x speedups over naïve regex matching."
+license = "BSD-3-Clause"
 authors = [
   { name = "QuantCo, Inc.", email = "noreply@quantco.com" },
   { name = "Jonas Haag", email = "jonas@lophus.org" },
