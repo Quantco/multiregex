@@ -7,6 +7,8 @@
 Changelog
 =========
 
+- Add license to package metadata.
+
 2.0.2 (2024-05-23)
 ------------------
 - Included a py.typed file to indicate that the package is fully typed.
