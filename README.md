@@ -21,7 +21,6 @@ git clone https://github.com/quantco/multiregex
 cd multiregex
 
 pixi run pre-commit-install
-pixi run postinstall
 pixi run test
 ```
 
