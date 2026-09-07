@@ -13,17 +13,42 @@ jobs:
     permissions:
       contents: read
     steps:
+<<<<<<< before updating
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+||||||| last update
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+=======
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+>>>>>>> after updating
         with:
           fetch-depth: 0
       - name: Set up pixi
+<<<<<<< before updating
         uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.6
         with:
           environments: build
+||||||| last update
+        uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
+        with:
+          environments: build
+=======
+        uses: prefix-dev/setup-pixi@1b2de7f3351f171c8b4dfeb558c639cb58ed4ec0 # v0.9.5
+      - name: Derive version
+        id: version
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
+        run: echo "version=$(git describe --tags --abbrev=0 | sed 's/^v//')" >> $GITHUB_OUTPUT
+      - name: Replace version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -i -e "s/0.0.0/${STEPS_VERSION_OUTPUTS_VERSION}/g" pyproject.toml
+        env:
+          STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}
+>>>>>>> after updating
       - name: Build project
-        run: pixi run -e build build-wheel
+        run: pixi run build-wheel
       - name: Check package
-        run: pixi run -e build check-wheel
+        run: pixi run check-wheel
       - name: Upload package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
