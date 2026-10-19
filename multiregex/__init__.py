@@ -32,12 +32,7 @@ except AttributeError:
     import sre_parse
 from collections.abc import Iterable
 from re import Pattern
-from typing import (
-    Optional,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import TypeVar, cast
 
 import ahocorasick
 
@@ -49,7 +44,7 @@ except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
 
 
 V = TypeVar("V")
-PatternOrStr = Union[Pattern, str]
+PatternOrStr = Pattern | str
 Prematchers = set[str]
 FalsePositivesCounter = dict[str, int]
 
@@ -61,9 +56,7 @@ class AhocorasickError(Exception):
 class RegexMatcher:
     def __init__(
         self,
-        patterns: Iterable[
-            Union[PatternOrStr, tuple[PatternOrStr, Optional[Iterable[str]]]]
-        ],
+        patterns: Iterable[PatternOrStr | tuple[PatternOrStr, Iterable[str] | None]],
         count_prematcher_false_positives=False,
     ):
         """
@@ -228,7 +221,7 @@ class RegexMatcher:
             key=lambda x: -x[1]["false_positives"],
         )
 
-    def format_prematcher_false_positives(self, worst_n: Optional[int] = None) -> str:
+    def format_prematcher_false_positives(self, worst_n: int | None = None) -> str:
         output = [
             "FP count | FP rate | Pattern / Prematchers",
             "---------+---------+----------------------",
