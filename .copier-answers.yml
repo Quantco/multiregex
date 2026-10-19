@@ -6,7 +6,7 @@ author_email: noreply@quantco.com
 author_name: QuantCo, Inc.
 github_url: https://github.com/quantco/multiregex
 github_user: pavelzw
-minimal_python_version: py39
+minimal_python_version: py311
 project_short_description: Quickly match many regexes against a string. Provides 2-10x
     speedups over naïve regex matching.
 project_slug: multiregex
