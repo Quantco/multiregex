@@ -1,5 +1,6 @@
-r"""Speed up regex matching with non-regex substring "prematchers", similar to
-Bloom filters.
+r"""Speed up regex matching with non-regex substring "prematchers".
+
+Prematchers work similar to Bloom filters.
 
 For each regex pattern we use a list of simple (non-regex) substring prematchers.
 When evaluating regex patterns on a string, we use the prematchers to restrict
@@ -59,7 +60,8 @@ class RegexMatcher:
         patterns: Iterable[PatternOrStr | tuple[PatternOrStr, Iterable[str] | None]],
         count_prematcher_false_positives=False,
     ):
-        """
+        """Create a matcher for the given patterns.
+
         Parameters
         ----------
         patterns : list of patterns or (pattern, prematchers) tuples
@@ -311,8 +313,7 @@ def _sre_find_terminals(sre_ast):
 
 
 def _ahocorasick_make_automaton(words: dict[str, V]) -> "ahocorasick.Automaton[V]":
-    """Make an ahocorasick automaton from a dictionary of `needle -> value`
-    items."""
+    """Make an ahocorasick automaton from a dictionary of `needle -> value` items."""
     automaton = ahocorasick.Automaton()  # type: ahocorasick.Automaton[V]
     for word, value in words.items():
         _ahocorasick_ensure_successful(automaton.add_word(word, value))
