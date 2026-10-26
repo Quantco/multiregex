@@ -1,4 +1,3 @@
-<<<<<<< before updating
 r"""Speed up regex matching with non-regex substring "prematchers", similar to
 Bloom filters.
 
@@ -21,9 +20,9 @@ automatically generated prematchers.
 
 import collections
 import functools
-import importlib.metadata
 import re
-import warnings
+import warnings as _warnings
+from importlib import metadata as _metadata
 
 try:
     sre_constants = re._constants  # type: ignore
@@ -36,13 +35,6 @@ from re import Pattern
 from typing import TypeVar, cast
 
 import ahocorasick
-||||||| last update
-import importlib.metadata
-import warnings
-=======
-import warnings as _warnings
-from importlib import metadata as _metadata
->>>>>>> after updating
 
 try:
     __version__ = _metadata.version(__name__)

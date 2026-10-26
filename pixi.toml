@@ -14,21 +14,17 @@ version = "*"
 
 [package.host-dependencies]
 python = ">=3.11"
-pyahocorasick = "*"
 hatchling = "*"
 uv = "*"
+
+[package.run-dependencies]
+pyahocorasick = "*"
 
 [dependencies]
 multiregex = { path = "." }
 
 [feature.test.dependencies]
-<<<<<<< before updating
-pytest = ">=6,<8"
-||||||| last update
-pytest = ">=6"
-=======
-pytest = "*"
->>>>>>> after updating
+pytest = "<8"
 pytest-cov = "*"
 mypy = "*"
 

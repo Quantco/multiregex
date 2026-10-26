@@ -20,21 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out branch
-<<<<<<< before updating
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-||||||| last update
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-=======
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
->>>>>>> after updating
       - name: Set up pixi
-<<<<<<< before updating
-        uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.6
-||||||| last update
-        uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
-=======
         uses: prefix-dev/setup-pixi@ad1da6449d9e506fd127fd67ab2d054a769f6a94 # v0.11.2
->>>>>>> after updating
       - name: Run linting
         run: pixi run lint
         env:
@@ -58,23 +46,11 @@ jobs:
           - windows-latest
     steps:
       - name: Check out branch
-<<<<<<< before updating
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-||||||| last update
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-=======
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
->>>>>>> after updating
         with:
           fetch-depth: 0
       - name: Set up pixi
-<<<<<<< before updating
-        uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.6
-||||||| last update
-        uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
-=======
         uses: prefix-dev/setup-pixi@ad1da6449d9e506fd127fd67ab2d054a769f6a94 # v0.11.2
->>>>>>> after updating
         with:
           environments: ${{ matrix.environment }}
       - name: Run pytest

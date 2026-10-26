@@ -13,25 +13,10 @@ jobs:
     permissions:
       contents: read
     steps:
-<<<<<<< before updating
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-||||||| last update
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-=======
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
->>>>>>> after updating
         with:
           fetch-depth: 0
       - name: Set up pixi
-<<<<<<< before updating
-        uses: prefix-dev/setup-pixi@5185adfbffb4bd703da3010310260805d89ebb11 # v0.9.6
-        with:
-          environments: build
-||||||| last update
-        uses: prefix-dev/setup-pixi@19eac09b398e3d0c747adc7921926a6d802df4da # v0.8.8
-        with:
-          environments: build
-=======
         uses: prefix-dev/setup-pixi@ad1da6449d9e506fd127fd67ab2d054a769f6a94 # v0.11.2
       - name: Derive version
         id: version
@@ -44,19 +29,12 @@ jobs:
           sed -i -E -e "s/(^|[^0-9])0\.0\.0([^0-9]|$)/\1${STEPS_VERSION_OUTPUTS_VERSION}\2/g" pyproject.toml
         env:
           STEPS_VERSION_OUTPUTS_VERSION: ${{ steps.version.outputs.version }}
->>>>>>> after updating
       - name: Build project
         run: pixi run build-wheel
       - name: Check package
         run: pixi run check-wheel
       - name: Upload package
-<<<<<<< before updating
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-||||||| last update
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-=======
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
->>>>>>> after updating
         with:
           name: artifact
           path: dist/*
@@ -70,21 +48,9 @@ jobs:
       id-token: write
     environment: pypi
     steps:
-<<<<<<< before updating
-      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-||||||| last update
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-=======
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
->>>>>>> after updating
         with:
           name: artifact
           path: dist
       - name: Publish package on PyPi
-<<<<<<< before updating
-        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
-||||||| last update
-        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
-=======
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
->>>>>>> after updating
