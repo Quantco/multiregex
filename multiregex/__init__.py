@@ -1,5 +1,6 @@
-r"""Speed up regex matching with non-regex substring "prematchers", similar to
-Bloom filters.
+r"""Speed up regex matching with non-regex substring "prematchers".
+
+Prematchers work similar to Bloom filters.
 
 For each regex pattern we use a list of simple (non-regex) substring prematchers.
 When evaluating regex patterns on a string, we use the prematchers to restrict
@@ -20,9 +21,9 @@ automatically generated prematchers.
 
 import collections
 import functools
-import importlib.metadata
 import re
-import warnings
+import warnings as _warnings
+from importlib import metadata as _metadata
 
 try:
     sre_constants = re._constants  # type: ignore
@@ -37,9 +38,9 @@ from typing import TypeVar, cast
 import ahocorasick
 
 try:
-    __version__ = importlib.metadata.version(__name__)
-except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
-    warnings.warn(f"Could not determine version of {__name__}\n{e!s}", stacklevel=2)
+    __version__ = _metadata.version(__name__)
+except _metadata.PackageNotFoundError as e:  # pragma: no cover
+    _warnings.warn(f"Could not determine version of {__name__}\n{e!s}", stacklevel=2)
     __version__ = "unknown"
 
 
@@ -59,7 +60,8 @@ class RegexMatcher:
         patterns: Iterable[PatternOrStr | tuple[PatternOrStr, Iterable[str] | None]],
         count_prematcher_false_positives=False,
     ):
-        """
+        """Create a matcher for the given patterns.
+
         Parameters
         ----------
         patterns : list of patterns or (pattern, prematchers) tuples
@@ -311,8 +313,7 @@ def _sre_find_terminals(sre_ast):
 
 
 def _ahocorasick_make_automaton(words: dict[str, V]) -> "ahocorasick.Automaton[V]":
-    """Make an ahocorasick automaton from a dictionary of `needle -> value`
-    items."""
+    """Make an ahocorasick automaton from a dictionary of `needle -> value` items."""
     automaton = ahocorasick.Automaton()  # type: ahocorasick.Automaton[V]
     for word, value in words.items():
         _ahocorasick_ensure_successful(automaton.add_word(word, value))
