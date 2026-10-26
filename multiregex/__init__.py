@@ -1,3 +1,4 @@
+<<<<<<< before updating
 r"""Speed up regex matching with non-regex substring "prematchers", similar to
 Bloom filters.
 
@@ -35,11 +36,18 @@ from re import Pattern
 from typing import TypeVar, cast
 
 import ahocorasick
+||||||| last update
+import importlib.metadata
+import warnings
+=======
+import warnings as _warnings
+from importlib import metadata as _metadata
+>>>>>>> after updating
 
 try:
-    __version__ = importlib.metadata.version(__name__)
-except importlib.metadata.PackageNotFoundError as e:  # pragma: no cover
-    warnings.warn(f"Could not determine version of {__name__}\n{e!s}", stacklevel=2)
+    __version__ = _metadata.version(__name__)
+except _metadata.PackageNotFoundError as e:  # pragma: no cover
+    _warnings.warn(f"Could not determine version of {__name__}\n{e!s}", stacklevel=2)
     __version__ = "unknown"
 
 
